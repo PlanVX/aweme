@@ -29,3 +29,12 @@ type Comment struct {
 	ID         int64  `json:"id"`          // 评论id
 	User       User   `json:"user"`        // 评论用户信息
 }
+
+// Message 消息
+type Message struct {
+	ID         int64  `json:"id"`           // 消息id
+	ToUserID   int64  `json:"to_user_id"`   // 该消息接收者的id
+	FromUserID int64  `json:"from_user_id"` // 该消息发送者的id
+	Content    string `json:"content"`      // 消息内容
+	CreateTime string `json:"create_time"`  // 消息创建时间
+}
