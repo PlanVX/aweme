@@ -2,63 +2,81 @@ package api
 
 import "context"
 
-type RelationActionRequest struct {
-	Token      string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	ToUserId   int64  `protobuf:"varint,2,opt,name=to_user_id,json=toUserId,proto3" json:"to_user_id,omitempty"`
-	ActionType int32  `protobuf:"varint,3,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+// RelationFollowListReq 用于获取关注列表请求
+type RelationFollowListReq struct {
+	UserID int64  `json:"user_id"` // 用户id
+	Token  string `json:"token"`   // 用户鉴权token
 }
 
-type RelationActionResponse struct {
-	StatusCode int32  `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
-	StatusMsg  string `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`
+// RelationFollowListResp 用于获取关注列表响应
+type RelationFollowListResp struct {
+	StatusCode int32      `json:"status_code"` // 状态码，0-成功，其他值-失败
+	StatusMsg  string     `json:"status_msg"`  // 返回状态描述
+	UserList   []UserResp `json:"user_list"`   // 用户信息列表
 }
 
-type RelationFollowListRequest struct {
-	UserId int64  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Token  string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+// RelationFollowerListReq 用于获取粉丝列表请求
+type RelationFollowerListReq struct {
+	UserID int64  `json:"user_id"` // 用户id
+	Token  string `json:"token"`   // 用户鉴权token
 }
 
-type RelationFollowListResponse struct {
-	StatusCode int32  `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
-	StatusMsg  string `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`
-	UserList   []User `protobuf:"bytes,3,rep,name=user_list,json=userList,proto3" json:"user_list,omitempty"`
+// RelationFollowerListResp 用于获取粉丝列表响应
+type RelationFollowerListResp struct {
+	StatusCode int32      `json:"status_code"` // 状态码，0-成功，其他值-失败
+	StatusMsg  string     `json:"status_msg"`  // 返回状态描述
+	UserList   []UserResp `json:"user_list"`   // 用户信息列表
 }
 
-type RelationFollowerListRequest struct {
-	UserId int64  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Token  string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+// RelationFriendListReq 用于获取好友列表请求
+type RelationFriendListReq struct {
+	UserID int64  `json:"user_id"` // 用户id
+	Token  string `json:"token"`   // 用户鉴权token
 }
 
-type RelationFollowerListResponse struct {
-	StatusCode int32  `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
-	StatusMsg  string `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`
-	UserList   []User `protobuf:"bytes,3,rep,name=user_list,json=userList,proto3" json:"user_list,omitempty"`
+// RelationFriendListResp 用于获取好友列表响应
+type RelationFriendListResp struct {
+	StatusCode int32            `json:"status_code"` // 状态码，0-成功，其他值-失败
+	StatusMsg  string           `json:"status_msg"`  // 返回状态描述
+	UserList   []FriendUserResp `json:"user_list"`   // 用户信息列表
 }
 
-type RelationFriendListRequest struct {
-	UserId int64  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Token  string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+// FriendUserResp 好友用户信息
+type FriendUserResp struct {
+	UserResp
+	Message string `json:"message,omitempty"` // 和该好友的最新聊天消息
+	MsgType int64  `json:"msg_type"`          // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
 }
 
-type RelationFriendListResponse struct {
-	StatusCode int32        `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
-	StatusMsg  string       `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`
-	UserList   []FriendUser `protobuf:"bytes,3,rep,name=user_list,json=userList,proto3" json:"user_list,omitempty"`
+// RelationActionReq 关系操作请求
+type RelationActionReq struct {
+	Token      string `json:"token"`       // 用户鉴权 token
+	ToUserID   int64  `json:"to_user_id"`  // 对方用户 id
+	ActionType int32  `json:"action_type"` // 1-关注，2-取消关注
 }
 
-type FriendUser struct {
-	User
-	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	MsgType int64  `protobuf:"varint,2,opt,name=msgType,proto3" json:"msgType,omitempty"`
+// RelationActionResp 关系操作响应
+type RelationActionResp struct {
+	StatusCode int32  `json:"status_code"` // 状态码，0-成功，其他值-失败
+	StatusMsg  string `json:"status_msg"`  // 返回状态描述
 }
 
 type RelationActionApiParam struct{}
 
+// NewRelationActionApi godoc
+// @Summary 关系操作
+// @Description 关系操作
+// @Tags 基础接口
+// @Accept x-www-form-urlencoded
+// @Produce  json
+// @Param relation formData RelationActionReq true "用户信息"
+// @Success 200 {object} RelationActionResp
+// @Router /relation/action/ [post]
 func NewRelationActionApi(param RelationActionApiParam) *Api {
 	return &Api{
 		Method: "POST",
 		Path:   "/relation/action/",
-		Handler: WrapperFunc(func(ctx context.Context, req *RelationActionRequest) (*RelationActionResponse, error) {
+		Handler: WrapperFunc(func(ctx context.Context, req *RelationActionReq) (*RelationActionResp, error) {
 			return nil, nil
 		}),
 	}
@@ -66,11 +84,20 @@ func NewRelationActionApi(param RelationActionApiParam) *Api {
 
 type RelationFollowListApiParam struct{}
 
+// NewRelationFollowListApi godoc
+// @Summary 用户关注列表
+// @Description 用户关注列表
+// @Tags 基础接口
+// @Accept x-www-form-urlencoded
+// @Produce  json
+// @Param relation formData RelationFollowListReq true "用户信息"
+// @Success 200 {object} RelationFollowListResp
+// @Router /relation/follow_list/ [get]
 func NewRelationFollowListApi(param RelationFollowListApiParam) *Api {
 	return &Api{
-		Method: "POST",
+		Method: "GET",
 		Path:   "/relation/follow_list/",
-		Handler: WrapperFunc(func(ctx context.Context, req *RelationFollowListRequest) (*RelationFollowListResponse, error) {
+		Handler: WrapperFunc(func(ctx context.Context, req *RelationFollowListReq) (*RelationFollowListResp, error) {
 			return nil, nil
 		}),
 	}
@@ -78,11 +105,20 @@ func NewRelationFollowListApi(param RelationFollowListApiParam) *Api {
 
 type RelationFollowerListApiParam struct{}
 
+// NewRelationFollowerListApi godoc
+// @Summary 用户粉丝列表
+// @Description 用户粉丝列表
+// @Tags 基础接口
+// @Accept x-www-form-urlencoded
+// @Produce  json
+// @Param relation formData RelationFollowerListReq true "用户信息"
+// @Success 200 {object} RelationFollowerListResp
+// @Router /relation/follower_list [get]
 func NewRelationFollowerListApi(param RelationFollowerListApiParam) *Api {
 	return &Api{
-		Method: "POST",
+		Method: "GRT",
 		Path:   "/relation/follower_list/",
-		Handler: WrapperFunc(func(ctx context.Context, req *RelationFollowerListRequest) (*RelationFollowerListResponse, error) {
+		Handler: WrapperFunc(func(ctx context.Context, req *RelationFollowerListReq) (*RelationFollowerListResp, error) {
 			return nil, nil
 		}),
 	}
@@ -90,11 +126,20 @@ func NewRelationFollowerListApi(param RelationFollowerListApiParam) *Api {
 
 type RelationFriendListApiParam struct{}
 
+// NewRelationFriendListApi godoc
+// @Summary 用户好友列表
+// @Description 用户好友列表
+// @Tags 基础接口
+// @Accept x-www-form-urlencoded
+// @Produce  json
+// @Param relation formData RelationFriendListReq true "用户信息"
+// @Success 200 {object} RelationFriendListResp
+// @Router /relation/friend_list [get]
 func NewRelationFriendListApi(param RelationFriendListApiParam) *Api {
 	return &Api{
-		Method: "POST",
+		Method: "GET",
 		Path:   "/relation/friend_list/",
-		Handler: WrapperFunc(func(ctx context.Context, req *RelationFriendListRequest) (*RelationFriendListResponse, error) {
+		Handler: WrapperFunc(func(ctx context.Context, req *RelationFriendListReq) (*RelationFriendListResp, error) {
 			return nil, nil
 		}),
 	}

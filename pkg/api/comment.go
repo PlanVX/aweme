@@ -31,17 +31,6 @@ type CommentListResp struct {
 	CommentList []*Comment `json:"comment_list"` // 评论列表
 }
 
-type NewCommentActionApiParam struct {
-	CommentId string `json:"comment_id" form:"comment_id" binding:"required"`
-	Action    string `json:"action" form:"action" binding:"required"`
-}
-
-type NewCommentListApiParam struct {
-	UserId   string `json:"user_id" form:"user_id" binding:"required"`
-	Page     int    `json:"page" form:"page"`
-	PageSize int    `json:"page_size" form:"page_size"`
-}
-
 type CommentActionApiParam struct{}
 
 // NewCommentActionApi godoc
@@ -56,7 +45,7 @@ type CommentActionApiParam struct{}
 func NewCommentActionApi(param CommentActionApiParam) *Api {
 	return &Api{
 		Method: "POST",
-		Path:   "/comment/action",
+		Path:   "/comment/action/",
 		Handler: WrapperFunc(func(ctx context.Context, req *CommentActionReq) (*CommentActionResp, error) {
 			return nil, nil
 		}),
@@ -77,7 +66,7 @@ type CommentListApi struct{}
 func NewCommentListApi(param CommentListApi) *Api {
 	return &Api{
 		Method: "GET",
-		Path:   "/comment/list",
+		Path:   "/comment/list/",
 		Handler: WrapperFunc(func(ctx context.Context, req *CommentListReq) (*CommentListResp, error) {
 			return nil, nil
 		}),

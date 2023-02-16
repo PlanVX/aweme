@@ -23,13 +23,13 @@ type UserApiParam struct{}
 // @Produce  json
 // @Param user_id query int64 true "用户id"
 // @Param token query string true "用户鉴权token"
-// @Success 200 {object} UserResp
+// @Success 200 {object} UserGetResp
 // @Router /user [get]
 func NewUserApi(param UserApiParam) *Api {
 	return &Api{
 		Method: "GET",
 		Path:   "/user/",
-		Handler: WrapperFunc(func(ctx context.Context, req *UserGetReq) (*UserResp, error) {
+		Handler: WrapperFunc(func(ctx context.Context, req *UserGetReq) (*UserGetResp, error) {
 			// 获取用户信息
 			return nil, nil
 		}),
