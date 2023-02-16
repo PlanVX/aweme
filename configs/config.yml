@@ -1,0 +1,15 @@
+release: true
+mysql:
+  host: $MYSQL_HOST
+  port: $MYSQL_PORT
+  username: $MYSQL_USER
+  password: $MYSQL_PASSWORD
+  database: $MYSQL_DATABASE
+
+jwt:
+  secret: $JWT_SECRET
+  ttl: 259200 # 3 days, 3 * 24 * 60 * 60
+  whitelist:
+
+api:
+  prefix: /v1
