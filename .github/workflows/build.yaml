@@ -16,16 +16,25 @@ jobs:
       - name: Swagger Docs Generation
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
-          swag init -g cmd/main.go
+          swag init -g cmd/main.go -p snakecase
 
       - name: Mockery Generation
         run: |
           go install github.com/vektra/mockery/v2@v2.20.0
           go generate ./...
 
-      - name: Go Code Test
+      - name: dependencies download
         run: |
           go mod download
+
+      - name: gorm generation
+        run: |
+          go run scripts/db/gen.go
+
+
+      - name: Go Code Test
+        run: |
+          go mod tidy
           go test ./... -race -coverprofile=coverage.txt -covermode=atomic
 
       - name: Upload coverage to Codecov

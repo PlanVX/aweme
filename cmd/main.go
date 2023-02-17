@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/PlanVX/aweme/pkg/api"
 	"github.com/PlanVX/aweme/pkg/config"
-	"github.com/PlanVX/aweme/pkg/dal"
+	"github.com/PlanVX/aweme/pkg/dal/query"
 	"github.com/PlanVX/aweme/pkg/logic"
 	"github.com/PlanVX/aweme/pkg/routes"
 	"go.uber.org/fx"
@@ -24,7 +24,7 @@ func main() {
 	app := fx.New(
 		fx.Provide(config.NewConfig, newZapLogger),
 		fx.WithLogger(fxLogger),
-		dal.Module,
+		query.Module,
 		logic.Module,
 		api.Module,
 		routes.Module,
