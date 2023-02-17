@@ -1,13 +1,17 @@
 // Package dal data access layer
-package dal
+package query
 
-import "go.uber.org/fx"
+import (
+	"github.com/PlanVX/aweme/pkg/dal"
+	"go.uber.org/fx"
+)
 
 // Module is the module for dal.
 // It provides the data access layer for the application.
 // fx.Annotate is used to wrap the struct with an interface.
 var Module = fx.Module("data access layer",
 	fx.Provide(
-		fx.Annotate(NewUserModel, fx.As(new(UserModel))),
-		fx.Annotate(NewVideoModel, fx.As(new(VideoModel))),
+		NewGormDB,
+		fx.Annotate(NewUserModel, fx.As(new(dal.UserModel))),
+		fx.Annotate(NewVideoModel, fx.As(new(dal.VideoModel))),
 	))

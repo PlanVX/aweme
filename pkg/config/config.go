@@ -21,8 +21,7 @@ type Config struct {
 		Prefix string `yaml:"prefix"` // ApiPrefix is the prefix for the API
 	} `yaml:"api"` // API is the configuration for the API
 	MySQL struct {
-		Host     string `yaml:"host"`     // MySQLHost is the host of the MySQL database
-		Port     int    `yaml:"port"`     // MySQLPort is the port of the MySQL database
+		Address  string `yaml:"address"`  // MySQLAddress is the address of the MySQL database
 		Username string `yaml:"username"` // MySQLUsername is the username of the MySQL database
 		Password string `yaml:"password"` // MySQLPassword is the password of the MySQL database
 		Database string `yaml:"database"` // MySQLDatabase is the database of the MySQL database
