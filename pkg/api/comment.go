@@ -1,73 +1,42 @@
 package api
 
-import "context"
+import (
+	"context"
+	"github.com/PlanVX/aweme/pkg/types"
+)
 
-// 评论操作请求
-type CommentActionReq struct {
-	Token       string `json:"token"`        // 用户鉴权token
-	VideoID     int64  `json:"video_id"`     // 视频id
-	ActionType  int32  `json:"action_type"`  // 1-发布评论，2-删除评论
-	CommentText string `json:"comment_text"` // 用户填写的评论内容，在action_type=1的时候使用
-	CommentID   int64  `json:"comment_id"`   // 要删除的评论id，在action_type=2的时候使用
-}
-
-// 评论操作响应
-type CommentActionResp struct {
-	StatusCode int32    `json:"status_code"` // 状态码，0-成功，其他值-失败
-	StatusMsg  string   `json:"status_msg"`  // 返回状态描述
-	Comment    *Comment `json:"comment"`     // 评论成功返回评论内容，不需要重新拉取整个列表
-}
-
-// 评论列表请求
-type CommentListReq struct {
-	Token   string `json:"token"`    // 用户鉴权token
-	VideoID int64  `json:"video_id"` // 视频id
-}
-
-// 评论列表响应
-type CommentListResp struct {
-	StatusCode  int32      `json:"status_code"`  // 状态码，0-成功，其他值-失败
-	StatusMsg   string     `json:"status_msg"`   // 返回状态描述
-	CommentList []*Comment `json:"comment_list"` // 评论列表
-}
-
-type CommentActionApiParam struct{}
-
-// NewCommentActionApi godoc
+// NewCommentAction godoc
 // @Summary 评论操作
 // @Description 评论操作
-// @Tags 评论接口
+// @Tags 互动接口
 // @Accept x-www-form-urlencoded
 // @Produce json
-// @Param user formData CommentActionReq true "评论信息"
-// @Success 200 {object} CommentActionResp
-// @Router /comment/action [post]
-func NewCommentActionApi(param CommentActionApiParam) *Api {
+// @Param user formData types.CommentActionReq true "评论信息"
+// @Success 200 {object} types.CommentActionResp
+// @Router /comment/action/ [post]
+func NewCommentAction() *Api {
 	return &Api{
 		Method: "POST",
 		Path:   "/comment/action/",
-		Handler: WrapperFunc(func(ctx context.Context, req *CommentActionReq) (*CommentActionResp, error) {
+		Handler: WrapperFunc(func(ctx context.Context, req *types.CommentActionReq) (*types.CommentActionResp, error) {
 			return nil, nil
 		}),
 	}
 }
 
-type CommentListApi struct{}
-
-// NewCommentListApi godoc
+// NewCommentList godoc
 // @Summary 评论列表
 // @Description 评论列表
-// @Tags 评论接口
-// @Accept x-www-form-urlencoded
+// @Tags 互动接口
 // @Produce json
-// @Param user_id query string true "用户ID"
-// @Success 200 {object} CommentListResp
-// @Router /comment/list [get]
-func NewCommentListApi(param CommentListApi) *Api {
+// @Param user_id query types.CommentListReq true "用户信息"
+// @Success 200 {object} types.CommentListResp
+// @Router /comment/list/ [get]
+func NewCommentList() *Api {
 	return &Api{
 		Method: "GET",
 		Path:   "/comment/list/",
-		Handler: WrapperFunc(func(ctx context.Context, req *CommentListReq) (*CommentListResp, error) {
+		Handler: WrapperFunc(func(ctx context.Context, req *types.CommentListReq) (*types.CommentListResp, error) {
 			return nil, nil
 		}),
 	}

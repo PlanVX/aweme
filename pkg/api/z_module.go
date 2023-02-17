@@ -22,10 +22,24 @@ func wrapPrivate[T any](t T) any { return fx.Annotate(t, fx.ResultTags(`group:"p
 // it provides all the APIs
 var Module = fx.Module("api",
 	fx.Provide(
+		// 1. public APIs
 		wrapPublic(NewRegister),
 		wrapPublic(NewLogin),
-		wrapOptional(NewFeed),
+		// 2. optional APIs
 		wrapOptional(NewUserInfo),
+		wrapOptional(NewFeed),
+		wrapOptional(NewPublishList),
+		wrapOptional(NewCommentList),
+		wrapOptional(NewFavoriteList),
+		// 3. private APIs
 		wrapPrivate(NewUpload),
+		wrapPrivate(NewFavoriteAction),
+		wrapPrivate(NewCommentAction),
+		wrapPrivate(NewRelationAction),
+		wrapPrivate(NewRelationFollowList),
+		wrapPrivate(NewRelationFollowerList),
+		wrapPrivate(NewRelationFriendList),
+		wrapPrivate(NewMessageChat),
+		wrapPrivate(NewMessageAction),
 	),
 )
