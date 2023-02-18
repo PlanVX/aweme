@@ -1,7 +1,6 @@
 release: true
 mysql:
-  host: $MYSQL_HOST
-  port: $MYSQL_PORT
+  address: $MYSQL_ADDRESS
   username: $MYSQL_USER
   password: $MYSQL_PASSWORD
   database: $MYSQL_DATABASE

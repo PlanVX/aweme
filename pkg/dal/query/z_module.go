@@ -1,4 +1,4 @@
-// Package dal data access layer
+// Package query data access layer
 package query
 
 import (
