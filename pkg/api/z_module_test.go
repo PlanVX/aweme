@@ -22,6 +22,7 @@ type Dep struct {
 	Feed        *logic.Feed
 	Upload      *logic.Upload
 	UserProfile *logic.UserProfile
+	PublishList *logic.PublishList
 }
 
 func TestGroupedValues(t *testing.T) {

@@ -1,8 +1,7 @@
 package api
 
 import (
-	"context"
-	"github.com/PlanVX/aweme/pkg/types"
+	"github.com/PlanVX/aweme/pkg/logic"
 )
 
 // NewPublishList godoc
@@ -13,12 +12,10 @@ import (
 // @Param param query types.PublishListReq true "获取视频列表参数"
 // @Success 200 {object} types.PublishListResp
 // @Router /publish/list/ [get]
-func NewPublishList() *Api {
+func NewPublishList(list *logic.PublishList) *Api {
 	return &Api{
-		Method: "GET",
-		Path:   "/publish/list/",
-		Handler: WrapperFunc(func(ctx context.Context, req *types.PublishListReq) (*types.PublishListResp, error) {
-			return nil, nil
-		}),
+		Method:  "GET",
+		Path:    "/publish/list/",
+		Handler: WrapperFunc(list.PublishList),
 	}
 }

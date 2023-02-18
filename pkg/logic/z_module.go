@@ -14,5 +14,6 @@ var Module = fx.Module("logic",
 		NewFeed,
 		NewUpload,
 		NewUserProfile,
+		NewPublishList,
 		NewJWTSigner,
 	))
