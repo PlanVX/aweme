@@ -22,6 +22,7 @@ type VideoModel interface {
 	FindOne(ctx context.Context, id int64) (*Video, error)
 	FindMany(ctx context.Context, ids []int64) ([]*Video, error)
 	FindLatest(ctx context.Context, latestTime, limit int64) ([]*Video, error)
+	FindByUserID(ctx context.Context, userID int64, limit, offset int) ([]*Video, error)
 	Insert(ctx context.Context, video *Video) error
 	Update(ctx context.Context, video *Video) error
 	Delete(ctx context.Context, id int64, uid int64) error
