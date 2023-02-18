@@ -26,6 +26,14 @@ type Config struct {
 		Password string `yaml:"password"` // MySQLPassword is the password of the MySQL database
 		Database string `yaml:"database"` // MySQLDatabase is the database of the MySQL database
 	} `yaml:"mysql"` // MySQL is the configuration for the MySQL database
+	S3 struct {
+		Endpoint  string `yaml:"endpoint"`  // S3Endpoint is the endpoint of the S3 bucket
+		Bucket    string `yaml:"bucket"`    // S3Bucket is the bucket of the S3 bucket
+		Region    string `yaml:"region"`    // S3Region is the region of the S3 bucket
+		AccessKey string `yaml:"accessKey"` // S3AccessKey is the access key of the S3 bucket
+		SecretKey string `yaml:"secretKey"` // S3SecretKey is the secret key of the S3 bucket
+		Partition string `yaml:"partition"` // S3Partition is the partition of the S3 bucket
+	} `yaml:"s3"` // S3 is the configuration for the S3 bucket
 }
 
 // NewConfig returns a new Config

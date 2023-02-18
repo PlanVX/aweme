@@ -1,12 +1,16 @@
 package logic
 
 import (
+	"context"
 	"github.com/PlanVX/aweme/pkg/config"
 	"github.com/golang-jwt/jwt/v4"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"time"
 )
+
+// ContextKey is the key of user id in context
+const ContextKey = "owner_id"
 
 // customClaims are custom claims extending default ones.
 type customClaims struct {
@@ -53,6 +57,12 @@ func (j *JWTSigner) NewJWTMiddleware() echo.MiddlewareFunc {
 	conf := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
 			return new(customClaims)
+		},
+		SuccessHandler: func(c echo.Context) {
+			// write owner id to context, so that we can use it
+			claims := c.Get("user").(*jwt.Token).Claims.(*customClaims)
+			ctx := context.WithValue(c.Request().Context(), ContextKey, claims.UserID)
+			c.SetRequest(c.Request().WithContext(ctx))
 		},
 		SigningKey: j.secret,
 		ErrorHandler: func(c echo.Context, err error) error {

@@ -1,6 +1,8 @@
 package types
 
-import "mime/multipart"
+import (
+	"io"
+)
 
 // FeedReq is the request of feed api
 type FeedReq struct {
@@ -17,9 +19,9 @@ type FeedResp struct {
 
 // UploadReq is the request of upload api /publish/action/
 type UploadReq struct {
-	Token string                `form:"token" json:"token"`
-	Title string                `form:"title" json:"title"`
-	Data  *multipart.FileHeader `form:"data" bind:"require"`
+	Title    string `form:"title" json:"title"`
+	FileName string
+	Data     io.Reader
 }
 
 // UploadResp is the response of upload api /publish/action/

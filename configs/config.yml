@@ -12,3 +12,11 @@ jwt:
 
 api:
   prefix: /v1
+
+s3:
+  accessKey: ${S3_ACCESS_KEY}
+  secretKey: ${S3_SECRET_KEY}
+  bucket: ${S3_BUCKET}
+  region: ${S3_REGION}
+  endpoint: ${S3_ENDPOINT}
+  partition: ${S3_PARTITION}
