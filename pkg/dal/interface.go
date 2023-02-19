@@ -48,4 +48,7 @@ type LikeModel interface {
 
 	// FindByVideoIDAndUserID finds a like record by video id and user id
 	FindByVideoIDAndUserID(ctx context.Context, vid, uid int64) (*Like, error)
+
+	// FindVideoIDsByUserID finds video ids by user id
+	FindVideoIDsByUserID(ctx context.Context, uid int64, limit, offset int) ([]int64, error)
 }

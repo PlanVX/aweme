@@ -1,0 +1,47 @@
+package logic
+
+import (
+	"context"
+	"github.com/PlanVX/aweme/pkg/dal"
+	"github.com/PlanVX/aweme/pkg/types"
+	"github.com/labstack/echo/v4"
+)
+
+type (
+	// Like is the like logic layer struct
+	Like struct {
+		likeModel dal.LikeModel
+	}
+	// LikeParam is the param for NewLike
+	LikeParam struct {
+		LikeModel dal.LikeModel
+	}
+)
+
+// NewLike returns a new Like logic
+func NewLike(param LikeParam) *Like {
+	return &Like{
+		likeModel: param.LikeModel,
+	}
+}
+
+// Like is the like logic
+// handle the like action
+func (l *Like) Like(c context.Context, req *types.FavoriteActionReq) (*types.FavoriteActionResp, error) {
+	owner, _ := c.Value(ContextKey).(int64) // get the owner from context
+	switch req.ActionType {
+	case 1: // means add like for a video
+		err := l.likeModel.Insert(c, &dal.Like{VideoID: req.VideoID, UserID: owner})
+		if err != nil {
+			return nil, err
+		}
+	case 2: // means remove like for a video
+		err := l.likeModel.Delete(c, req.VideoID, owner)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, echo.ErrBadRequest
+	}
+	return &types.FavoriteActionResp{}, nil
+}
