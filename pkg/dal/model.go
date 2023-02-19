@@ -36,3 +36,11 @@ type Like struct {
 	UserID    int64     `gorm:"type:bigint;not null"`                       // 用户id
 	CreatedAt time.Time // 创建时间
 }
+
+// Ralation 关系表
+type Realtion struct {
+	ID       int64     `gorm:"primary_key;auto_increment:false" json:"id"` // 点赞id
+	Follower int64     `gorm:"type:bigint;not null"`                       // 关注者id
+	Followed int64     `gorm:"type:bigint;not null"`                       // 被关注者id
+	UpdateAt time.Time //关系创建时间
+}

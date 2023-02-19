@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+
 	"github.com/PlanVX/aweme/pkg/dal"
 	"gorm.io/gorm"
 )
@@ -38,4 +39,9 @@ func (c *CommentModel) Delete(ctx context.Context, id int64, uid int64) error {
 		return gorm.ErrRecordNotFound
 	}
 	return nil // success
+}
+
+// GetNumByVideoID get comment count by videoid
+func (c *CommentModel) GetNumByVideoID(ctx context.Context, vid int64) (int32, error) {
+	panic("未实现")
 }
