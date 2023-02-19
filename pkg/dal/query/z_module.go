@@ -14,4 +14,6 @@ var Module = fx.Module("data access layer",
 		NewGormDB,
 		fx.Annotate(NewUserModel, fx.As(new(dal.UserModel))),
 		fx.Annotate(NewVideoModel, fx.As(new(dal.VideoModel))),
+		fx.Annotate(NewLikeModel, fx.As(new(dal.LikeModel))),
+		fx.Annotate(NewCommentModel, fx.As(new(dal.CommentModel))),
 	))
