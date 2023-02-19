@@ -2,13 +2,11 @@ package logic
 
 import (
 	"context"
-	"errors"
-	"time"
-
 	"github.com/PlanVX/aweme/pkg/config"
 	"github.com/golang-jwt/jwt/v4"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"time"
 )
 
 // ContextKey is the key of user id in context
@@ -97,25 +95,4 @@ func (j *JWTSigner) genSignedToken(username string, id int64) (string, error) {
 	token := genToken(username, id, j.duration)
 	// Generate encoded token
 	return token.SignedString(j.secret)
-}
-
-// 根据jwt token解析出userid
-func (j *JWTSigner) parseUserID(tokenString string) (int64, error) {
-	// 解析 JWT Token
-	token, err := jwt.ParseWithClaims(tokenString, &customClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(j.secret), nil // 这里需要指定用于签名验证的密钥
-	})
-	if err != nil {
-		return 0, err
-	}
-	// 检查 Token 是否有效
-	if !token.Valid {
-		return 0, errors.New("invalid token")
-	}
-	// 提取用户 id
-	claims, ok := token.Claims.(*customClaims)
-	if !ok {
-		return 0, errors.New("invalid token claims")
-	}
-	return claims.UserID, nil
 }
