@@ -36,6 +36,11 @@ func (l *LikeModel) Delete(ctx context.Context, vid, uid int64) error {
 	return nil
 }
 
+// FindVideoIDsByUserID finds liked video ids by user id
+func (l *LikeModel) FindVideoIDsByUserID(ctx context.Context, uid int64, limit, offset int) ([]int64, error) {
+	return l.queries.WithContext(ctx).FindVideoIDsByUserID(uid, limit, offset)
+}
+
 // FindByVideoIDAndUserID finds a like by video id and user id
 func (l *LikeModel) FindByVideoIDAndUserID(ctx context.Context, vid, uid int64) (*dal.Like, error) {
 	return l.queries.WithContext(ctx).FindByVideoIDAndUserID(vid, uid)

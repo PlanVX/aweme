@@ -61,6 +61,12 @@ type Like interface {
 	// delete from likes
 	// where video_id=@videoID and user_id=@userID
 	DeleteByVideoIDAndUserID(videoID, userID int64) (gen.RowsAffected, error)
+	//FindVideoIDsByUserID
+	//
+	// select video_id
+	// from likes
+	// where user_id=@userID limit @limit offset @offset
+	FindVideoIDsByUserID(userID int64, limit, offset int) ([]int64, error)
 }
 
 // Comment  defines the comment model sql queries
