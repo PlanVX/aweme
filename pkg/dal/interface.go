@@ -33,6 +33,7 @@ type VideoModel interface {
 //go:generate mockery --name=CommentModel --output=../logic --filename=mock_c_test.go --outpkg=logic
 type CommentModel interface {
 	FindByVideoID(ctx context.Context, videoID int64, limit, offset int) ([]*Comment, error)
+	GetNumByVideoID(ctx context.Context, videoID int64) (int32, error)
 	Insert(ctx context.Context, comment *Comment) error
 	Delete(ctx context.Context, id int64, uid int64) error
 }
@@ -48,4 +49,33 @@ type LikeModel interface {
 
 	// FindByVideoIDAndUserID finds a like record by video id and user id
 	FindByVideoIDAndUserID(ctx context.Context, vid, uid int64) (*Like, error)
+
+	GetNumByVideoIDAndUserID(ctx context.Context, vid, uid int64) (int32, error)
+
+	// FindByUserID finds records by user id
+	FindByUserID(ctx context.Context, uid int64) ([]*Like, error)
+
+	GetNumByVideoID(ctx context.Context, videoID int64) (int32, error)
+}
+
+// RelationModel is the interface for relation model operations
+//
+//go:generate mockery --name=RelationModel --output=../logic --filename=mock_r_test.go --outpkg=logic
+type RelationModel interface {
+	//Insert inserts a relation record
+	Insert(ctx context.Context, rel *Realtion) error
+	//Delete deletes a relation record by follwer id and follwed id
+	Delete(ctx context.Context, follwerid, follwedid int64) error
+
+	// FindByFollowerID finds a relation record collection by follwerid
+	FindByFollowerID(ctx context.Context, followerid int64) ([]*Realtion, error)
+
+	GetNumByFollowerID(ctx context.Context, followerid int64) (int32, error)
+
+	// FindByFollowedID finds a relation record collection by follwedid
+	FindByFollowedID(ctx context.Context, follwedid int64) ([]*Realtion, error)
+
+	GetNumByFollowedID(ctx context.Context, followedid int64) (int32, error)
+
+	GetNumByFollowerIDAndFollowedID(ctx context.Context, follwerid int64, follwedid int64) (int32, error)
 }
