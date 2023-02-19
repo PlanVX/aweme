@@ -48,6 +48,38 @@ type Video interface {
 	FindByTimestamp(timestamp time.Time, limit int64) ([]*gen.T, error)
 }
 
+// Like defines the like model sql queries
+type Like interface {
+	// FindByVideoIDAndUserID
+	//
+	// select id, user_id, video_id, created_at
+	// from likes
+	// where video_id=@videoID and user_id=@userID
+	FindByVideoIDAndUserID(videoID, userID int64) (*gen.T, error)
+	// DeleteByVideoIDAndUserID delete by video id and user id
+	//
+	// delete from likes
+	// where video_id=@videoID and user_id=@userID
+	DeleteByVideoIDAndUserID(videoID, userID int64) (gen.RowsAffected, error)
+}
+
+// Comment  defines the comment model sql queries
+type Comment interface {
+	// FindByVideoID
+	//
+	// select id, user_id, video_id, content, created_at
+	// from comments
+	// where video_id=@id
+	// order by created_at desc
+	// limit @limit offset @offset
+	FindByVideoID(id int64, limit, offset int) ([]*gen.T, error)
+	// DeleteByIDAndUserID delete comment by id and user id
+	//
+	// delete from comments
+	// where id=@id and user_id=@userID
+	DeleteByIDAndUserID(id, userID int64) (gen.RowsAffected, error)
+}
+
 func main() {
 	g := gen.NewGenerator(gen.Config{
 		OutPath: "./pkg/dal/query",
@@ -57,5 +89,7 @@ func main() {
 	g.ApplyInterface(func(FindByID) {}, new(dal.User), new(dal.Video))
 	g.ApplyInterface(func(FindByUsername) {}, new(dal.User))
 	g.ApplyInterface(func(Video) {}, new(dal.Video))
+	g.ApplyInterface(func(Like) {}, new(dal.Like))
+	g.ApplyInterface(func(Comment) {}, new(dal.Comment))
 	g.Execute()
 }

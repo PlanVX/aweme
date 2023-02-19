@@ -28,3 +28,11 @@ type Comment struct {
 	UserID    int64     `gorm:"type:bigint;not null"`                       // 用户id
 	CreatedAt time.Time // 创建时间
 }
+
+// Like 点赞表
+type Like struct {
+	ID        int64     `gorm:"primary_key;auto_increment:false" json:"id"` // 点赞id
+	VideoID   int64     `gorm:"type:bigint;not null"`                       // 视频id
+	UserID    int64     `gorm:"type:bigint;not null"`                       // 用户id
+	CreatedAt time.Time // 创建时间
+}
