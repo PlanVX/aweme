@@ -3,7 +3,7 @@ on: [ push, pull_request ]
 
 jobs:
 
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -13,24 +13,15 @@ jobs:
         with:
           go-version: 1.19
 
-      - name: Swagger Docs Generation
+      - name: Code Generation
         run: |
-          go install github.com/swaggo/swag/cmd/swag@latest
-          swag init -g cmd/main.go -p snakecase
-      - name: Mockery Generation
-        run: |
-          go install github.com/vektra/mockery/v2@v2.20.0
-          go generate ./...
-      - name: dependencies download
-        run: |
-          go mod download
-      - name: gorm generation
-        run: |
-          go run scripts/db/gen.go
+          MOCKERY=1 sh ./scripts/codegen.sh
+
       - name: Go Code Test
         run: |
           go mod tidy
           go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
@@ -39,3 +30,32 @@ jobs:
       - name: Go Build
         run: |
           go build  -ldflags="-w -s"  -o  app cmd/main.go
+
+  container:
+    runs-on: ubuntu-latest
+    needs: [ test ]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: Code Generation
+        run: |
+          sh ./scripts/codegen.sh
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./scripts/Dockerfile
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/aweme:latest
