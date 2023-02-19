@@ -5,6 +5,7 @@ import (
 	"github.com/PlanVX/aweme/pkg/dal"
 	"github.com/PlanVX/aweme/pkg/types"
 	"github.com/labstack/echo/v4"
+	"go.uber.org/fx"
 )
 
 type (
@@ -14,6 +15,7 @@ type (
 	}
 	// LikeParam is the param for NewLike
 	LikeParam struct {
+		fx.In
 		LikeModel dal.LikeModel
 	}
 )
