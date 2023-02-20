@@ -51,7 +51,7 @@ func (c *CommentList) CommentList(ctx context.Context, req *types.CommentListReq
 	}
 	// 转换为map
 	userMappings := lo.SliceToMap(userList, func(user *dal.User) (int64, *types.User) {
-		return user.ID, &types.User{ID: user.ID, Username: user.Username, Avatar: user.Avatar}
+		return user.ID, covertUser(user)
 	})
 	// 获取关注关系列表
 	list, err := c.relationModel.FindWhetherFollowedList(ctx, userid, userIds)

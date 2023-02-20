@@ -51,16 +51,11 @@ func (c *CommentAction) CommentAction(ctx context.Context, req *types.CommentAct
 				ID:         comment.ID,
 				Content:    comment.Content,
 				CreateDate: comment.CreatedAt.Format("01-02"),
-				User: &types.User{
-					ID:       comment.UserID,
-					Username: user.Username,
-					Avatar:   user.Avatar,
-					IsFollow: false,
-				},
+				User:       covertUser(user),
 			},
 		}, nil
 	} else if req.ActionType == 2 {
-		err := c.commentModel.Delete(ctx, req.CommentID, userid)
+		err := c.commentModel.Delete(ctx, req.CommentID, userid, req.VideoID)
 		if err != nil {
 			return nil, err
 		}

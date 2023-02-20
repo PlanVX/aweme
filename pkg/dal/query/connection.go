@@ -35,5 +35,8 @@ func NewGormDB(config *config.Config, logger *zap.Logger, lf fx.Lifecycle) (*gor
 		}
 		return sqlDB.Close()
 	}})
+	if config.Release == false { // debug mode when not release
+		db = db.Debug()
+	}
 	return db, err
 }

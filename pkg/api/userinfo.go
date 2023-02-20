@@ -10,10 +10,10 @@ import "github.com/PlanVX/aweme/pkg/logic"
 // @Produce  json
 // @Param user query types.UserInfoReq true "用户信息"
 // @Success 200 {object} types.UserInfoResp
-// @Router /user/info/ [get]
+// @Router /user/ [get]
 func NewUserInfo(profile *logic.UserProfile) *Api {
 	return &Api{
-		Path:    "/user/info/",
+		Path:    "/user/",
 		Method:  "GET",
 		Handler: WrapperFunc(profile.GetProfile),
 	}

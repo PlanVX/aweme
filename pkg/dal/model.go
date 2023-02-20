@@ -1,23 +1,36 @@
 package dal
 
-import "time"
+import (
+	"time"
+)
 
 // User 用户表
 type User struct {
-	ID       int64  `gorm:"primary_key;auto_increment:false"` // 用户id
-	Username string `gorm:"type:varchar(32);uniqueIndex"`     // 用户名
-	Password []byte `gorm:"type:varchar(200);not null"`       // 密码
-	Avatar   string `gorm:"type:varchar(200)"`                // 头像URL
+	ID              int64  `gorm:"primary_key;auto_increment:false" redis:"-"` // 用户id
+	Username        string `gorm:"type:varchar(32);uniqueIndex" redis:"-"`     // 用户名
+	Password        []byte `gorm:"type:varchar(200);not null" redis:"-"`       // 密码
+	Avatar          string `gorm:"type:varchar(200)" redis:"-"`                // 头像URL
+	BackgroundImage string `gorm:"type:varchar(200)" redis:"-"`                // 背景图片URL
+	Signature       string `gorm:"type:varchar(200)" redis:"-"`                // 个性签名
+	// 不存入数据库
+	VideoCount   int64 `gorm:"-" redis:"video_count"`    // 视频数量
+	LikeCount    int64 `gorm:"-" redis:"like_count"`     // 点赞数量
+	FansCount    int64 `gorm:"-" redis:"fans_count"`     // 粉丝数量
+	FollowCount  int64 `gorm:"-" redis:"follow_count"`   // 关注数量
+	BeLikedCount int64 `gorm:"-" redis:"be_liked_count"` // 被点赞数量
 }
 
 // Video 视频表
 type Video struct {
-	ID        int64     `gorm:"primary_key;auto_increment:false" json:"id"`  // 视频id
-	UserID    int64     `gorm:"type:bigint;not null"`                        // 用户id
-	VideoURL  string    `gorm:"type:varchar(200);not null" json:"video_url"` // 视频URL
-	CoverURL  string    `gorm:"type:varchar(200);not null" json:"cover_url"` // 封面URL
-	Title     string    `gorm:"type:varchar(200);not null" json:"title"`     // 视频标题
+	ID        int64     `gorm:"primary_key;auto_increment:false" redis:"-"` // 视频id
+	UserID    int64     `gorm:"type:bigint;not null" redis:"-"`             // 用户id
+	VideoURL  string    `gorm:"type:varchar(200);not null" redis:"-"`       // 视频URL
+	CoverURL  string    `gorm:"type:varchar(200);not null" redis:"-"`       // 封面URL
+	Title     string    `gorm:"type:varchar(200);not null" redis:"-"`       // 视频标题
 	CreatedAt time.Time // 创建时间
+	// 不存入数据库
+	LikeCount    int64 `gorm:"-" redis:"like_count"`    // 点赞数量
+	CommentCount int64 `gorm:"-" redis:"comment_count"` // 评论数量
 }
 
 // Comment 评论表

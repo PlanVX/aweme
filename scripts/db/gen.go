@@ -42,7 +42,7 @@ type Video interface {
 	//
 	//  SELECT id, user_id, title, created_at, video_url, cover_url
 	//  FROM `videos`
-	//  WHERE `videos`.`created_at` > @timestamp
+	//  WHERE `videos`.`created_at` < @timestamp
 	//  ORDER BY `videos`.`created_at` desc
 	//  LIMIT @limit
 	FindByTimestamp(timestamp time.Time, limit int64) ([]*gen.T, error)
@@ -86,16 +86,39 @@ type Comment interface {
 	DeleteByIDAndUserID(id, userID int64) (gen.RowsAffected, error)
 }
 
+// Relation defines the relation model sql queries
+type Relation interface {
+	// FindFollowerTo finds relation records by userid
+	//
+	// select follow_to
+	// from relations
+	// where user_id=@userid limit @limit offset @offset
+	FindFollowerTo(userid int64, limit, offset int) ([]int64, error)
+
+	// FindFollowerFrom finds a relation record by follow_to
+	//
+	// select user_id
+	// from relations
+	// where follow_to=@followTo limit @limit offset @offset
+	FindFollowerFrom(followTo int64, limit, offset int) ([]int64, error)
+	// DeleteByUserIDAndFollowTo delete by user id and follow to
+	//
+	// delete from relations
+	// where user_id=@userID and follow_to=@followTo
+	DeleteByUserIDAndFollowTo(userID, followTo int64) (gen.RowsAffected, error)
+}
+
 func main() {
 	g := gen.NewGenerator(gen.Config{
 		OutPath: "./pkg/dal/query",
 		Mode:    gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface,
 	})
-	g.ApplyBasic(new(dal.User), new(dal.Video))
+	g.ApplyBasic(new(dal.User), new(dal.Video), new(dal.Like), new(dal.Comment), new(dal.Relation))
 	g.ApplyInterface(func(FindByID) {}, new(dal.User), new(dal.Video))
 	g.ApplyInterface(func(FindByUsername) {}, new(dal.User))
 	g.ApplyInterface(func(Video) {}, new(dal.Video))
 	g.ApplyInterface(func(Like) {}, new(dal.Like))
 	g.ApplyInterface(func(Comment) {}, new(dal.Comment))
+	g.ApplyInterface(func(Relation) {}, new(dal.Relation))
 	g.Execute()
 }

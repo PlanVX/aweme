@@ -35,6 +35,11 @@ type Config struct {
 		SecretKey string `yaml:"secretKey"` // S3SecretKey is the secret key of the S3 bucket
 		Partition string `yaml:"partition"` // S3Partition is the partition of the S3 bucket
 	} `yaml:"s3"` // S3 is the configuration for the S3 bucket
+	Redis struct {
+		Addr     []string `yaml:"address"`  // RedisAddr is the address of the Redis database
+		Password string   `yaml:"password"` // RedisPassword is the password of the Redis database
+		DB       int      `yaml:"db"`       // RedisDB is the database of the Redis database
+	} `yaml:"redis"` // Redis is the configuration for the Redis database
 }
 
 // NewConfig returns a new Config

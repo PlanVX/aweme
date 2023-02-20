@@ -49,7 +49,7 @@ func TestNewCommentAction(t *testing.T) {
 	}
 	t.Run("delete comment success", func(t *testing.T) {
 		model := NewCommentModel(t)
-		model.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		model.On("Delete", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		c := NewCommentAction(CommentActionParam{CommentModel: model})
 		action, err := c.CommentAction(ctx, delReq)
 		assertions.NoError(err)
@@ -58,7 +58,7 @@ func TestNewCommentAction(t *testing.T) {
 	t.Run("delete comment failed", func(t *testing.T) {
 		model := NewCommentModel(t)
 		c := NewCommentAction(CommentActionParam{CommentModel: model})
-		model.On("Delete", mock.Anything, mock.Anything, mock.Anything).Return(errors.New("failed"))
+		model.On("Delete", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(errors.New("failed"))
 		action, err := c.CommentAction(ctx, delReq)
 		assertions.Error(err)
 		assertions.Nil(action)
