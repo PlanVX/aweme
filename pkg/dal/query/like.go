@@ -45,3 +45,17 @@ func (l *LikeModel) FindVideoIDsByUserID(ctx context.Context, uid int64, limit, 
 func (l *LikeModel) FindByVideoIDAndUserID(ctx context.Context, vid, uid int64) (*dal.Like, error) {
 	return l.queries.WithContext(ctx).FindByVideoIDAndUserID(vid, uid)
 }
+
+// FindWhetherLiked finds a like record by video ids and user id
+// return a list of video id that liked by userid
+func (l *LikeModel) FindWhetherLiked(ctx context.Context, userid int64, videoID []int64) ([]int64, error) {
+	var result []int64
+	err := l.queries.WithContext(ctx).
+		Select(l.queries.VideoID).
+		Where(l.queries.UserID.Eq(userid), l.queries.VideoID.In(videoID...)).
+		Scan(&result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

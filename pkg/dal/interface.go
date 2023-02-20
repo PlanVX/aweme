@@ -51,4 +51,32 @@ type LikeModel interface {
 
 	// FindVideoIDsByUserID finds video ids by user id
 	FindVideoIDsByUserID(ctx context.Context, uid int64, limit, offset int) ([]int64, error)
+
+	// FindWhetherLiked finds a like record by video id and user id
+	// return a list of id that liked by userid
+	FindWhetherLiked(ctx context.Context, userid int64, videoID []int64) ([]int64, error)
+}
+
+// RelationModel is the interface for relation model operations
+//
+//go:generate mockery --name=RelationModel --output=../logic --filename=mock_r_test.go --outpkg=logic
+type RelationModel interface {
+	//Insert inserts a relation record
+	Insert(ctx context.Context, rel *Relation) error
+	//Delete deletes a relation record by userid and followTo
+	Delete(ctx context.Context, userid, followTo int64) error
+
+	// FindWhetherFollowedList finds a relation record by userid and followTo
+	// return a list of id that followed by userid
+	FindWhetherFollowedList(ctx context.Context, userid int64, followTo []int64) ([]int64, error)
+
+	// FindFollowerTo finds a relation record by userid
+	// which means find the user who userid follows
+	// return a list of user id
+	FindFollowerTo(ctx context.Context, userid int64, limit, offset int) ([]int64, error)
+
+	// FindFollowerFrom finds a relation record by followTo
+	// which means find the user who followTo is followed by
+	// return a list of user id
+	FindFollowerFrom(ctx context.Context, followTo int64, limit, offset int) ([]int64, error)
 }
