@@ -5,6 +5,7 @@ import (
 	"github.com/PlanVX/aweme/pkg/dal"
 	"github.com/PlanVX/aweme/pkg/types"
 	"github.com/samber/lo"
+	"go.uber.org/fx"
 )
 
 type (
@@ -16,6 +17,7 @@ type (
 	}
 	// LikeListParam is the param for NewLikeList
 	LikeListParam struct {
+		fx.In
 		LikeModel  dal.LikeModel
 		UserModel  dal.UserModel
 		VideoModel dal.VideoModel

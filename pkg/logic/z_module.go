@@ -15,6 +15,8 @@ var Module = fx.Module("logic",
 		NewUpload,
 		NewUserProfile,
 		NewPublishList,
+		NewLike,
+		NewLikeList,
 		NewJWTSigner,
 		fx.Annotate(NewS3, fx.As(new(Uploader))),
 	))

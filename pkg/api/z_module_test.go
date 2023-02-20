@@ -23,6 +23,8 @@ type Dep struct {
 	Upload      *logic.Upload
 	UserProfile *logic.UserProfile
 	PublishList *logic.PublishList
+	Like        *logic.Like
+	LikeList    *logic.LikeList
 }
 
 func TestGroupedValues(t *testing.T) {
