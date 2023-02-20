@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -12,7 +11,10 @@ func WrapperFunc[Req any, Resp any](biz func(context.Context, *Req) (*Resp, erro
 	return func(c echo.Context) error {
 		req := new(Req)
 		if err := c.Bind(req); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("unsupported request parameters: %w", err))
+			return echo.NewHTTPError(http.StatusBadRequest, "unsupported request parameters")
+		}
+		if err := c.Validate(req); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid request parameters")
 		}
 		resp, err := biz(c.Request().Context(), req)
 		if err != nil {

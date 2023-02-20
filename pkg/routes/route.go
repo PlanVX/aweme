@@ -6,6 +6,7 @@ import (
 	"github.com/PlanVX/aweme/pkg/api"
 	"github.com/PlanVX/aweme/pkg/config"
 	"github.com/PlanVX/aweme/pkg/logic"
+	"github.com/PlanVX/aweme/pkg/types"
 	"github.com/brpaz/echozap"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -16,6 +17,24 @@ import (
 	"net/http"
 )
 
+// CustomBinder is a custom binder to bind request body to struct
+type CustomBinder struct {
+	d echo.DefaultBinder
+}
+
+// NewCustomBinder returns a new CustomBinder
+func NewCustomBinder() *CustomBinder {
+	return &CustomBinder{d: echo.DefaultBinder{}}
+}
+
+// Bind implements echo.Binder interface
+func (b *CustomBinder) Bind(v any, c echo.Context) error {
+	if err := b.d.BindQueryParams(c, v); err != nil {
+		return err
+	}
+	return b.d.Bind(v, c)
+}
+
 // NewEcho returns a new echo instance and basic middleware is added
 func NewEcho(logger *zap.Logger) *echo.Echo {
 	e := echo.New()
@@ -24,6 +43,26 @@ func NewEcho(logger *zap.Logger) *echo.Echo {
 	e.Use(echozap.ZapLogger(logger)) // use zap logger to replace default logger
 	// add recover middleware so when panic happens, it will be recovered to centralize error handling
 	e.Use(middleware.Recover())
+	e.Binder = NewCustomBinder()
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		logger.Error("error when handling request", zap.Error(err))
+		// if the error is echo.HTTPError, it means it is a known error.
+		// We can get the internal message from it.
+		resp := new(types.Response)
+		if he, ok := err.(*echo.HTTPError); ok {
+			resp.Code = int64(he.Code)
+			resp.Msg = he.Message.(string)
+		} else {
+			resp.Code = int64(http.StatusInternalServerError)
+			resp.Msg = "failed"
+		}
+		// Send response
+		err = c.JSON(http.StatusOK, resp)
+		if err != nil {
+			logger.Error("error when send response in error handler", zap.Error(err))
+		}
+	}
+	e.Validator = api.NewCustomValidator()
 	return e
 }
 
@@ -62,8 +101,8 @@ func AddRouters(param AddRoutersParam) *echo.Echo {
 }
 
 // StartServer starts the HTTP server in fx.Lifecycle, so that it can be gracefully shutdown.
-func StartServer(lf fx.Lifecycle, e *echo.Echo) {
-	server := &http.Server{Addr: ":8080", Handler: e}
+func StartServer(lf fx.Lifecycle, e *echo.Echo, c *config.Config) {
+	server := &http.Server{Addr: c.API.Address, Handler: e}
 	lf.Append(fx.Hook{OnStart: func(ctx context.Context) error {
 		go func() {
 			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {

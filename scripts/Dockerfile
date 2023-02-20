@@ -30,5 +30,6 @@ COPY --from=builder /app/aweme /app/aweme
 # copy default config
 COPY configs /app/configs
 
-EXPOSE 8080
+# default port
+EXPOSE 80
 CMD ["./aweme"]

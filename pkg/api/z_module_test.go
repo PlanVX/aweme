@@ -25,6 +25,8 @@ type Dep struct {
 	PublishList *logic.PublishList
 	Like        *logic.Like
 	LikeList    *logic.LikeList
+	Comment     *logic.CommentAction
+	CommentList *logic.CommentList
 }
 
 func TestGroupedValues(t *testing.T) {
