@@ -9,9 +9,9 @@ import (
 // @Description 赞操作
 // @Tags 互动接口
 // @Produce json
-// @Param favorite query types.FavoriteActionReq true "用户消息信息"
+// @Param favorite formData types.FavoriteActionReq true "用户消息信息"
 // @Success 200 {object} types.FavoriteActionResp
-// @Router /favorite/action/ [get]
+// @Router /favorite/action/ [POST]
 func NewFavoriteAction(like *logic.Like) *Api {
 	return &Api{
 		Method:  "POST",

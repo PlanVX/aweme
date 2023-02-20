@@ -12,6 +12,7 @@ jwt:
 
 api:
   prefix: /v1
+  address: 0.0.0.0:80
 
 s3:
   accessKey: ${S3_ACCESS_KEY}

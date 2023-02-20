@@ -1,8 +1,7 @@
 package api
 
 import (
-	"context"
-	"github.com/PlanVX/aweme/pkg/types"
+	"github.com/PlanVX/aweme/pkg/logic"
 )
 
 // NewCommentAction godoc
@@ -14,13 +13,11 @@ import (
 // @Param user formData types.CommentActionReq true "评论信息"
 // @Success 200 {object} types.CommentActionResp
 // @Router /comment/action/ [post]
-func NewCommentAction() *Api {
+func NewCommentAction(action *logic.CommentAction) *Api {
 	return &Api{
-		Method: "POST",
-		Path:   "/comment/action/",
-		Handler: WrapperFunc(func(ctx context.Context, req *types.CommentActionReq) (*types.CommentActionResp, error) {
-			return nil, nil
-		}),
+		Method:  "POST",
+		Path:    "/comment/action/",
+		Handler: WrapperFunc(action.CommentAction),
 	}
 }
 
@@ -32,12 +29,10 @@ func NewCommentAction() *Api {
 // @Param user_id query types.CommentListReq true "用户信息"
 // @Success 200 {object} types.CommentListResp
 // @Router /comment/list/ [get]
-func NewCommentList() *Api {
+func NewCommentList(list *logic.CommentList) *Api {
 	return &Api{
-		Method: "GET",
-		Path:   "/comment/list/",
-		Handler: WrapperFunc(func(ctx context.Context, req *types.CommentListReq) (*types.CommentListResp, error) {
-			return nil, nil
-		}),
+		Method:  "GET",
+		Path:    "/comment/list/",
+		Handler: WrapperFunc(list.CommentList),
 	}
 }

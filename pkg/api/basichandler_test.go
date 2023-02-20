@@ -10,7 +10,7 @@ import (
 )
 
 type TestReq struct {
-	In string `form:"in" json:"in" validate:"required" query:"in"`
+	In string `form:"in" json:"in" validate:"required,alphanum,min=1,max=16" query:"in"`
 }
 
 type TestResp struct {
@@ -29,6 +29,7 @@ func Biz(_ context.Context, req *TestReq) (*TestResp, error) {
 func TestWrapperFunc(t *testing.T) {
 	handler := WrapperFunc(Biz)
 	e := echo.New()
+	e.Validator = NewCustomValidator()
 	var testCases = []struct {
 		jsonStr string
 		wantErr bool
@@ -37,6 +38,8 @@ func TestWrapperFunc(t *testing.T) {
 		{`{"in":"hello"}`, false, `{"out":"hello"}`},
 		{`{f}`, true, ``},
 		{`{"in":"error"}`, true, ``},
+		{`{"in":"error"}`, true, ``},
+		{`{"in":"error."}`, true, ``},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.jsonStr, func(t *testing.T) {

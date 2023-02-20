@@ -18,7 +18,8 @@ type Config struct {
 		Whitelist []string `yaml:"whitelist"` // JwtWhitelist is the list of paths that can be accessed either with or without a JWT
 	} `yaml:"jwt"` // JWT is the configuration for the JWT
 	API struct {
-		Prefix string `yaml:"prefix"` // ApiPrefix is the prefix for the API
+		Prefix  string `yaml:"prefix"`  // ApiPrefix is the prefix for the API
+		Address string `yaml:"address"` // ApiAddress is the address of the API server, like 0.0.0.0:8080
 	} `yaml:"api"` // API is the configuration for the API
 	MySQL struct {
 		Address  string `yaml:"address"`  // MySQLAddress is the address of the MySQL database
