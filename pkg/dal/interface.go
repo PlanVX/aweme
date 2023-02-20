@@ -33,7 +33,6 @@ type VideoModel interface {
 //go:generate mockery --name=CommentModel --output=../logic --filename=mock_c_test.go --outpkg=logic
 type CommentModel interface {
 	FindByVideoID(ctx context.Context, videoID int64, limit, offset int) ([]*Comment, error)
-	GetNumByVideoID(ctx context.Context, videoID int64) (int32, error)
 	Insert(ctx context.Context, comment *Comment) error
 	Delete(ctx context.Context, id int64, uid int64) error
 }
@@ -53,12 +52,9 @@ type LikeModel interface {
 	// FindVideoIDsByUserID finds video ids by user id
 	FindVideoIDsByUserID(ctx context.Context, uid int64, limit, offset int) ([]int64, error)
 
-	GetNumByVideoIDAndUserID(ctx context.Context, vid, uid int64) (int32, error)
-
-	// FindByUserID finds records by user id
-	FindByUserID(ctx context.Context, uid int64) ([]*Like, error)
-
-	GetNumByVideoID(ctx context.Context, videoID int64) (int32, error)
+	// FindWhetherLiked finds a like record by video id and user id
+	// return a list of id that liked by userid
+	FindWhetherLiked(ctx context.Context, userid int64, videoID []int64) ([]int64, error)
 }
 
 // RelationModel is the interface for relation model operations
@@ -66,19 +62,21 @@ type LikeModel interface {
 //go:generate mockery --name=RelationModel --output=../logic --filename=mock_r_test.go --outpkg=logic
 type RelationModel interface {
 	//Insert inserts a relation record
-	Insert(ctx context.Context, rel *Realtion) error
-	//Delete deletes a relation record by follwer id and follwed id
-	Delete(ctx context.Context, follwerid, follwedid int64) error
+	Insert(ctx context.Context, rel *Relation) error
+	//Delete deletes a relation record by userid and followTo
+	Delete(ctx context.Context, userid, followTo int64) error
 
-	// FindByFollowerID finds a relation record collection by follwerid
-	FindByFollowerID(ctx context.Context, followerid int64) ([]*Realtion, error)
+	// FindWhetherFollowedList finds a relation record by userid and followTo
+	// return a list of id that followed by userid
+	FindWhetherFollowedList(ctx context.Context, userid int64, followTo []int64) ([]int64, error)
 
-	GetNumByFollowerID(ctx context.Context, followerid int64) (int32, error)
+	// FindFollowerTo finds a relation record by userid
+	// which means find the user who userid follows
+	// return a list of user id
+	FindFollowerTo(ctx context.Context, userid int64, limit, offset int) ([]int64, error)
 
-	// FindByFollowedID finds a relation record collection by follwedid
-	FindByFollowedID(ctx context.Context, follwedid int64) ([]*Realtion, error)
-
-	GetNumByFollowedID(ctx context.Context, followedid int64) (int32, error)
-
-	GetNumByFollowerIDAndFollowedID(ctx context.Context, follwerid int64, follwedid int64) (int32, error)
+	// FindFollowerFrom finds a relation record by followTo
+	// which means find the user who followTo is followed by
+	// return a list of user id
+	FindFollowerFrom(ctx context.Context, followTo int64, limit, offset int) ([]int64, error)
 }
