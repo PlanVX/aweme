@@ -47,3 +47,4 @@ CREATE TABLE `relations` (
     PRIMARY KEY (`id`),
     KEY `user_created` (`user_id`, `created_at` DESC),
     KEY `follow_to_created` (`follow_to`, `created_at` DESC)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
