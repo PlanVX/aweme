@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:latest
+    networks:
+      - backend
+    env_file:
+      - ./scripts/.env
+    volumes:
+      - ./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:latest
+    volumes:
+      - redis-data:/data
+    networks:
+      - backend
+
+  app:
+    build:
+      context: .
+      dockerfile: ./scripts/Dockerfile
+    image: sixwaaaay/aweme:latest
+    # Load environment variables from .env file
+    env_file:
+      - ./scripts/.env
+    volumes:
+      # Use configs folder for configuration files
+      - ./configs:/app/configs
+    expose:
+      - "80"
+    ports:
+      - "8080:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: always
+    networks:
+      - backend
+
+volumes:
+  mysql-data:
+  redis-data:
+
+networks:
+  backend:
+    name: backend
