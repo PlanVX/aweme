@@ -34,6 +34,6 @@ func (u *UserProfile) GetProfile(ctx context.Context, req *types.UserInfoReq) (*
 		return nil, err
 	}
 	return &types.UserInfoResp{
-		User: &types.User{ID: v.ID, Username: v.Username, Avatar: v.Avatar},
+		User: covertUser(v),
 	}, nil
 }

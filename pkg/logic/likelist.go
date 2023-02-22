@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/PlanVX/aweme/pkg/dal"
 	"github.com/PlanVX/aweme/pkg/types"
-	"github.com/samber/lo"
 	"go.uber.org/fx"
 )
 
@@ -36,6 +35,7 @@ func NewLikeList(param LikeListParam) *LikeList {
 // LikeList is the like list logic
 // handle the like list
 func (l *LikeList) LikeList(ctx context.Context, req *types.FavoriteListReq) (*types.FavoriteListResp, error) {
+	owner, _ := ctx.Value(ContextKey).(int64)
 	likes, err := l.likeModel.FindVideoIDsByUserID(ctx, req.UserID, 30, 0)
 	if err != nil {
 		return nil, err
@@ -48,9 +48,12 @@ func (l *LikeList) LikeList(ctx context.Context, req *types.FavoriteListReq) (*t
 	if err != nil {
 		return nil, err
 	}
-	videos := packVideos(many, users)
+	likedList, err := l.likeModel.FindWhetherLiked(ctx, owner, likes)
+	if err != nil {
+		return nil, err
+	}
 	// set is favorite
-	lo.ForEach(videos, func(item *types.Video, _ int) { item.IsFavorite = true })
+	videos := packVideos(many, users, likedList)
 	return &types.FavoriteListResp{
 		VideoList: videos,
 	}, nil

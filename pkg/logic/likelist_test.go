@@ -18,11 +18,13 @@ func TestLikeList(t *testing.T) {
 	videoIDs := []int64{1, 2}
 	dalVideos := []*dal.Video{{ID: 1, UserID: 4}, {ID: 2, UserID: 5}}
 	dalUsers := []*dal.User{{ID: 4}, {ID: 5}}
+	likedList := []int64{1}
 	t.Run("query success", func(t *testing.T) {
 		likeModel, videoModel, userModel, list := mockLikeList(t)
 		likeModel.On("FindVideoIDsByUserID",
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything,
 		).Return(videoIDs, nil)
+		likeModel.On("FindWhetherLiked", mock.Anything, mock.Anything, mock.Anything).Return(likedList, nil)
 		videoModel.On("FindMany", mock.Anything, mock.Anything).Return(dalVideos, nil)
 		userModel.On("FindMany", mock.Anything, mock.Anything).Return(dalUsers, nil)
 
@@ -31,10 +33,11 @@ func TestLikeList(t *testing.T) {
 		})
 		assertions.NoError(err)
 		assertions.NotNil(resp.VideoList)
+		assertions.True(resp.VideoList[0].IsFavorite)
+		assertions.False(resp.VideoList[1].IsFavorite)
 		lo.ForEach(resp.VideoList, func(item *types.Video, index int) {
 			assertions.Equal(dalVideos[index].ID, item.ID)
 			assertions.Equal(dalVideos[index].UserID, item.Author.ID)
-			assertions.Equal(true, item.IsFavorite)
 		})
 	})
 	t.Run("query like list failed", func(t *testing.T) {

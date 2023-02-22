@@ -52,7 +52,7 @@ func TestNewEcho(t *testing.T) {
 	e := NewEcho(example)
 	assertions := assert.New(t)
 	assertions.NotNil(e)
-	e.Add("GET", "/test", func(c echo.Context) error {
+	e.Add("GET", "/test/", func(c echo.Context) error {
 		param := c.QueryParam("param")
 		switch param {
 		case "echo": // echo error

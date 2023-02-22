@@ -34,7 +34,7 @@ type VideoModel interface {
 type CommentModel interface {
 	FindByVideoID(ctx context.Context, videoID int64, limit, offset int) ([]*Comment, error)
 	Insert(ctx context.Context, comment *Comment) error
-	Delete(ctx context.Context, id int64, uid int64) error
+	Delete(ctx context.Context, id int64, uid int64, vid int64) error
 }
 
 // LikeModel is the interface for like model operations

@@ -9,8 +9,8 @@ type UserResp struct {
 
 // UserReq is the request of user register/login api
 type UserReq struct {
-	Username string `form:"username" json:"username" query:"username" validate:"required,alphanum,min=1,max=16"`   // 用户名
-	Password string `form:"password" json:"password" query:"password" validate:"required,printascii,min=8,max=16"` // 密码
+	Username string `form:"username" json:"username" query:"username" validate:"required,printascii,min=1,max=16"` // 用户名
+	Password string `form:"password" json:"password" query:"password" validate:"required,printascii,min=6,max=16"` // 密码
 }
 
 // UserInfoReq is the request of user info api

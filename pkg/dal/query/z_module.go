@@ -3,7 +3,9 @@ package query
 
 import (
 	"github.com/PlanVX/aweme/pkg/dal"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/fx"
+	"gorm.io/gorm"
 )
 
 // Module is the module for dal.
@@ -12,8 +14,21 @@ import (
 var Module = fx.Module("data access layer",
 	fx.Provide(
 		NewGormDB,
-		fx.Annotate(NewUserModel, fx.As(new(dal.UserModel))),
-		fx.Annotate(NewVideoModel, fx.As(new(dal.VideoModel))),
-		fx.Annotate(NewLikeModel, fx.As(new(dal.LikeModel))),
-		fx.Annotate(NewCommentModel, fx.As(new(dal.CommentModel))),
+		newModel,
+		NewRedisUniversalClient,
 	))
+
+// newModel returns the data access layer models.
+func newModel(db *gorm.DB, rds redis.UniversalClient) (
+	dal.UserModel,
+	dal.CommentModel,
+	dal.VideoModel,
+	dal.RelationModel,
+	dal.LikeModel) {
+	use := Use(db)
+	return NewUserModel(use.User, rds),
+		NewCommentModel(use.Comment, rds),
+		NewVideoModel(use.Video, rds),
+		NewRelationModel(use.Relation, rds),
+		NewLikeModel(use.Like, rds)
+}

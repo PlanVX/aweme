@@ -32,12 +32,12 @@ func NewLike(param LikeParam) *Like {
 func (l *Like) Like(c context.Context, req *types.FavoriteActionReq) (*types.FavoriteActionResp, error) {
 	owner, _ := c.Value(ContextKey).(int64) // get the owner from context
 	switch req.ActionType {
-	case 1: // means add like for a video
+	case int32(1): // means add like for a video
 		err := l.likeModel.Insert(c, &dal.Like{VideoID: req.VideoID, UserID: owner})
 		if err != nil {
 			return nil, err
 		}
-	case 2: // means remove like for a video
+	case int32(2): // means remove like for a video
 		err := l.likeModel.Delete(c, req.VideoID, owner)
 		if err != nil {
 			return nil, err

@@ -2,9 +2,9 @@ package types
 
 // FavoriteActionReq 用户点赞请求
 type FavoriteActionReq struct {
-	Token      string `query:"token" json:"token"`             // 用户鉴权token
-	VideoID    int64  `query:"video_id" json:"video_id"`       // 视频id
-	ActionType int32  `query:"action_type" json:"action_type"` // 1-点赞，2-取消点赞
+	Token      string `query:"token" json:"token" form:"token" mapstructure:"token"`                         // 用户鉴权token
+	VideoID    int64  `query:"video_id" json:"video_id" form:"video_id" mapstructure:"video_id"`             // 视频id
+	ActionType int32  `query:"action_type" json:"action_type" form:"action_type" mapstructure:"action_type"` // 1-点赞，2-取消点赞
 }
 
 // FavoriteActionResp 用户点赞响应
@@ -15,8 +15,8 @@ type FavoriteActionResp struct {
 
 // FavoriteListReq 用户点赞列表请求
 type FavoriteListReq struct {
-	UserID int64  `json:"user_id"` // 用户id
-	Token  string `json:"token"`   // 用户鉴权token
+	UserID int64  `query:"user_id"` // 用户id
+	Token  string `query:"token"`   // 用户鉴权token
 }
 
 // FavoriteListResp 用户点赞列表响应

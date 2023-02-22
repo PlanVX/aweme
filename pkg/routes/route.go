@@ -38,8 +38,9 @@ func (b *CustomBinder) Bind(v any, c echo.Context) error {
 // NewEcho returns a new echo instance and basic middleware is added
 func NewEcho(logger *zap.Logger) *echo.Echo {
 	e := echo.New()
-	e.HideBanner = true              // hide echo banner
-	e.HidePort = true                // hide port in log
+	e.HideBanner = true // hide echo banner
+	e.HidePort = true   // hide port in log
+	e.Pre(middleware.AddTrailingSlash())
 	e.Use(echozap.ZapLogger(logger)) // use zap logger to replace default logger
 	// add recover middleware so when panic happens, it will be recovered to centralize error handling
 	e.Use(middleware.Recover())

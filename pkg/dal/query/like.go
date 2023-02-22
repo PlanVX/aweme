@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 	"github.com/PlanVX/aweme/pkg/dal"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -11,19 +12,25 @@ var _ dal.LikeModel = (*LikeModel)(nil)
 
 // LikeModel is the like model implementation for dal.LikeModel
 type LikeModel struct {
-	db      *gorm.DB
 	queries like
+	rdb     redis.UniversalClient
 }
 
 // NewLikeModel creates a new like model
-func NewLikeModel(db *gorm.DB) *LikeModel {
-	l := Use(db).Like
-	return &LikeModel{db: db, queries: l}
+func NewLikeModel(db like, rdb redis.UniversalClient) *LikeModel {
+	return &LikeModel{
+		queries: db, rdb: rdb,
+	}
 }
 
 // Insert inserts a like
 func (l *LikeModel) Insert(ctx context.Context, like *dal.Like) error {
-	return l.queries.WithContext(ctx).Create(like)
+	if err := l.queries.WithContext(ctx).Create(like); err != nil {
+		return err
+	}
+	l.rdb.HIncrBy(ctx, GenRedisKey(TableVideo, like.VideoID), CountLike, 1)
+	l.rdb.HIncrBy(ctx, GenRedisKey(TableUser, like.UserID), CountLike, 1)
+	return nil
 }
 
 // Delete deletes a like by video id and user id
@@ -33,6 +40,8 @@ func (l *LikeModel) Delete(ctx context.Context, vid, uid int64) error {
 	} else if r == 0 { // not found means no rows affected
 		return gorm.ErrRecordNotFound
 	}
+	l.rdb.HIncrBy(ctx, GenRedisKey(TableVideo, vid), CountLike, -1)
+	l.rdb.HIncrBy(ctx, GenRedisKey(TableUser, uid), CountLike, -1)
 	return nil
 }
 

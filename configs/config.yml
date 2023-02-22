@@ -21,3 +21,8 @@ s3:
   region: ${S3_REGION}
   endpoint: ${S3_ENDPOINT}
   partition: ${S3_PARTITION}
+
+redis:
+  address: [${REDIS_ADDRESS}]
+  password: ${REDIS_PASSWORD}
+  db: ${REDIS_DB}
