@@ -3,7 +3,7 @@ module github.com/PlanVX/aweme
 go 1.19
 
 require (
-	github.com/aws/aws-sdk-go v1.44.204
+	github.com/aws/aws-sdk-go v1.44.207
 	github.com/brpaz/echozap v1.1.3
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/go-sql-driver/mysql v1.7.0
