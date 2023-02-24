@@ -12,17 +12,27 @@ var _ dal.RelationModel = (*RelationModel)(nil)
 
 // RelationModel is the implementation of RelationModel
 type RelationModel struct {
-	rds redis.UniversalClient
-	r   relation
+	rds      redis.UniversalClient
+	r        relation
+	uniqueID *UniqueID
 }
 
 // NewRelationModel returns a *RelationModel
 func NewRelationModel(db relation, rds redis.UniversalClient) *RelationModel {
-	return &RelationModel{rds: rds, r: db}
+	return &RelationModel{
+		rds:      rds,
+		r:        db,
+		uniqueID: NewUniqueID(),
+	}
 }
 
 // Insert create a relation record
 func (r *RelationModel) Insert(ctx context.Context, rel *dal.Relation) error {
+	uid, err := r.uniqueID.NextID()
+	if err != nil {
+		return err
+	}
+	rel.ID = uid
 	if err := r.r.Create(rel); err != nil {
 		return err
 	}

@@ -11,15 +11,17 @@ var _ dal.UserModel = (*CustomUserModel)(nil)
 
 // CustomUserModel is the implementation of UserModel
 type CustomUserModel struct {
-	u   user
-	rds redis.UniversalClient
+	u        user
+	rds      redis.UniversalClient
+	uniqueID *UniqueID
 }
 
 // NewUserModel returns a *CustomUserModel
 func NewUserModel(u user, rds redis.UniversalClient) *CustomUserModel {
 	return &CustomUserModel{
-		u:   u,
-		rds: rds,
+		u:        u,
+		rds:      rds,
+		uniqueID: NewUniqueID(),
 	}
 }
 
@@ -50,6 +52,11 @@ func (c *CustomUserModel) FindByUsername(ctx context.Context, username string) (
 
 // Insert insert a user
 func (c *CustomUserModel) Insert(ctx context.Context, u *dal.User) error {
+	uid, err := c.uniqueID.NextID()
+	if err != nil {
+		return err
+	}
+	u.ID = uid
 	return c.u.WithContext(ctx).Create(u)
 }
 
