@@ -13,16 +13,17 @@ var _ dal.VideoModel = (*CustomVideoModel)(nil)
 
 // CustomVideoModel is the implementation of VideoModel
 type CustomVideoModel struct {
-	v   video    // video is the gorm/gen generated query struct
-	db  *gorm.DB // db is the gorm db instance
-	rdb redis.UniversalClient
+	v        video                 // video is the gorm/gen generated query struct
+	rdb      redis.UniversalClient // rdb is the redis client
+	uniqueID *UniqueID             // uniqueID is the unique id generator
 }
 
 // NewVideoModel returns a *CustomVideoModel
 func NewVideoModel(db video, rdb redis.UniversalClient) *CustomVideoModel {
 	return &CustomVideoModel{
-		v:   db,
-		rdb: rdb,
+		v:        db,
+		rdb:      rdb,
+		uniqueID: NewUniqueID(),
 	}
 }
 
@@ -67,7 +68,12 @@ func (c *CustomVideoModel) FindByUserID(ctx context.Context, userID int64, limit
 
 // Insert insert a video
 func (c *CustomVideoModel) Insert(ctx context.Context, video *dal.Video) error {
-	err := c.v.WithContext(ctx).Create(video)
+	id, err := c.uniqueID.NextID()
+	if err != nil {
+		return err
+	}
+	video.ID = id
+	err = c.v.WithContext(ctx).Create(video)
 	if err != nil {
 		return err
 	}

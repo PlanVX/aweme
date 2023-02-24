@@ -13,13 +13,18 @@ var _ dal.CommentModel = (*CommentModel)(nil)
 
 // CommentModel is the implementation of dal.CommentModel
 type CommentModel struct {
-	queries comment
-	rdb     redis.UniversalClient
+	queries  comment
+	rdb      redis.UniversalClient
+	uniqueID *UniqueID
 }
 
 // NewCommentModel creates a new comment model
 func NewCommentModel(c comment, rdb redis.UniversalClient) *CommentModel {
-	return &CommentModel{queries: c, rdb: rdb}
+	return &CommentModel{
+		queries:  c,
+		rdb:      rdb,
+		uniqueID: NewUniqueID(),
+	}
 }
 
 // FindByVideoID finds comments by video id
@@ -29,7 +34,12 @@ func (c *CommentModel) FindByVideoID(ctx context.Context, videoID int64, limit, 
 
 // Insert inserts a comment
 func (c *CommentModel) Insert(ctx context.Context, comment *dal.Comment) error {
-	err := c.queries.WithContext(ctx).Create(comment)
+	uid, err := c.uniqueID.NextID()
+	if err != nil {
+		return err
+	}
+	comment.ID = uid
+	err = c.queries.WithContext(ctx).Create(comment)
 	if err != nil {
 		return err
 	}

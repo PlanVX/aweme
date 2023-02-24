@@ -1,5 +1,5 @@
 CREATE TABLE `videos` (
-    `id` bigint (20) AUTO_INCREMENT,
+    `id` bigint (20),
     `user_id` bigint (20) NOT NULL,
     `video_url` varchar(200) NOT NULL,
     `cover_url` varchar(200) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE `videos` (
     KEY `user_created` (`user_id`, `created_at` DESC)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE `users` (
-    `id` bigint (20) AUTO_INCREMENT,
+    `id` bigint (20),
     `username` varchar(40) NOT NULL,
     `password` varchar(200) NOT NULL,
     `avatar` varchar(200) DEFAULT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE `users` (
     UNIQUE KEY `username` (`username`)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE `comments` (
-    `id` bigint (20) AUTO_INCREMENT,
+    `id` bigint (20),
     `content` text NOT NULL,
     `video_id` bigint (20) NOT NULL,
     `user_id` bigint (20) NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE `comments` (
     KEY `video_user_index` (`video_id`, `user_id`)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE `likes` (
-    `id` bigint (20) AUTO_INCREMENT,
+    `id` bigint (20),
     `video_id` bigint (20) NOT NULL,
     `user_id` bigint (20) NOT NULL,
     `created_at` datetime (3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -40,7 +40,7 @@ CREATE TABLE `likes` (
     KEY `user_index` (`user_id`, `created_at` DESC, `video_id`)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE `relations` (
-    `id` bigint (20) AUTO_INCREMENT,
+    `id` bigint (20),
     `user_id` bigint (20) NOT NULL,
     `follow_to` bigint (20) NOT NULL,
     `created_at` datetime NOT NULL,

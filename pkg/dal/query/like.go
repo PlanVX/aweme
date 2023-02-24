@@ -12,19 +12,27 @@ var _ dal.LikeModel = (*LikeModel)(nil)
 
 // LikeModel is the like model implementation for dal.LikeModel
 type LikeModel struct {
-	queries like
-	rdb     redis.UniversalClient
+	queries  like
+	rdb      redis.UniversalClient
+	uniqueID *UniqueID
 }
 
 // NewLikeModel creates a new like model
 func NewLikeModel(db like, rdb redis.UniversalClient) *LikeModel {
 	return &LikeModel{
-		queries: db, rdb: rdb,
+		queries:  db,
+		rdb:      rdb,
+		uniqueID: NewUniqueID(),
 	}
 }
 
 // Insert inserts a like
 func (l *LikeModel) Insert(ctx context.Context, like *dal.Like) error {
+	id, err := l.uniqueID.NextID()
+	if err != nil {
+		return err
+	}
+	like.ID = id
 	if err := l.queries.WithContext(ctx).Create(like); err != nil {
 		return err
 	}
