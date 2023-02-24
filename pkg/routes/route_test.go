@@ -52,7 +52,7 @@ func TestNewEcho(t *testing.T) {
 	e := NewEcho(example)
 	assertions := assert.New(t)
 	assertions.NotNil(e)
-	e.Add("GET", "/test/", func(c echo.Context) error {
+	e.Add("GET", "/test", func(c echo.Context) error {
 		param := c.QueryParam("param")
 		switch param {
 		case "echo": // echo error
@@ -108,4 +108,34 @@ func TestNewEcho(t *testing.T) {
 			assertions.Equal(tc.resp, resp)
 		})
 	}
+}
+
+func Test_prefixSkipper(t *testing.T) {
+	skipper := prefixSkipper("/api")
+	var testCases = []struct {
+		name string
+		path string
+		want bool
+	}{
+		{
+			name: " starts with /api",
+			path: "/api/test",
+			want: false,
+		},
+		{
+			name: "not starts with /api",
+			path: "/test",
+			want: true,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest("GET", tc.path, nil)
+			resp := httptest.NewRecorder()
+			e := echo.New()
+			newContext := e.NewContext(req, resp)
+			assert.Equal(t, tc.want, skipper(newContext))
+		})
+	}
+
 }

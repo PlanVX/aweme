@@ -8,6 +8,7 @@ import (
 	"github.com/PlanVX/aweme/pkg/logic"
 	"github.com/PlanVX/aweme/pkg/types"
 	"github.com/brpaz/echozap"
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/samber/lo"
@@ -15,6 +16,7 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"net/http"
+	"strings"
 )
 
 // CustomBinder is a custom binder to bind request body to struct
@@ -40,7 +42,11 @@ func NewEcho(logger *zap.Logger) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true // hide echo banner
 	e.HidePort = true   // hide port in log
-	e.Pre(middleware.AddTrailingSlash())
+
+	// add prometheus middleware
+	p := prometheus.NewPrometheus("echo", nil)
+	p.Use(e)
+
 	e.Use(echozap.ZapLogger(logger)) // use zap logger to replace default logger
 	// add recover middleware so when panic happens, it will be recovered to centralize error handling
 	e.Use(middleware.Recover())
@@ -81,6 +87,14 @@ type AddRoutersParam struct {
 // AddRouters adds all the routes to echo
 func AddRouters(param AddRoutersParam) *echo.Echo {
 	prefix := param.Config.API.Prefix // get api prefix from config
+	// add trailing slash middleware
+
+	param.E.Pre(middleware.AddTrailingSlashWithConfig(middleware.TrailingSlashConfig{
+		Skipper: prefixSkipper(prefix),
+		// add trailing slash for all routes starting with API.Prefix of config
+		// otherwise, it doesn't need trailing slash
+	}))
+
 	// group apis with common prefix
 	group := param.E.Group(prefix)
 	for _, h := range param.PublicApis { // add public apis
@@ -101,6 +115,18 @@ func AddRouters(param AddRoutersParam) *echo.Echo {
 	return param.E
 }
 
+// prefixSkipper returns a skipper function for middleware.
+// middleware will handle the request if the request path starts with prefix
+// otherwise it will skip the request
+func prefixSkipper(prefix string) func(c echo.Context) bool {
+	return func(c echo.Context) bool {
+		if strings.HasPrefix(c.Request().URL.Path, prefix) {
+			return false // don't skip
+		}
+		return true // otherwise skip
+	}
+}
+
 // StartServer starts the HTTP server in fx.Lifecycle, so that it can be gracefully shutdown.
 func StartServer(lf fx.Lifecycle, e *echo.Echo, c *config.Config) {
 	server := &http.Server{Addr: c.API.Address, Handler: e}
@@ -111,5 +137,7 @@ func StartServer(lf fx.Lifecycle, e *echo.Echo, c *config.Config) {
 			}
 		}()
 		return nil
-	}, OnStop: func(ctx context.Context) error { return server.Shutdown(ctx) }})
+	}, OnStop: func(ctx context.Context) error {
+		return server.Shutdown(ctx)
+	}})
 }
