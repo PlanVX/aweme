@@ -4,78 +4,82 @@ import (
 	"context"
 	"github.com/PlanVX/aweme/pkg/dal"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 // check if UserModel implements UserModel interface
-var _ dal.UserModel = (*CustomUserModel)(nil)
+var _ dal.UserModel = (*UserModel)(nil)
 
-// CustomUserModel is the implementation of UserModel
-type CustomUserModel struct {
-	u        user
-	rds      redis.UniversalClient
+// UserModel is the implementation of dal.UserModel
+type UserModel struct {
+	db       *gorm.DB
 	uniqueID *UniqueID
+	rdb      redis.UniversalClient
 }
 
-// NewUserModel returns a *CustomUserModel
-func NewUserModel(u user, rds redis.UniversalClient) *CustomUserModel {
-	return &CustomUserModel{
-		u:        u,
-		rds:      rds,
+// NewUserModel returns a *UserModel
+func NewUserModel(db *gorm.DB, rdb redis.UniversalClient) *UserModel {
+	return &UserModel{
+		db:       db,
 		uniqueID: NewUniqueID(),
+		rdb:      rdb,
 	}
 }
 
 // FindOne find one user by id
-func (c *CustomUserModel) FindOne(ctx context.Context, id int64) (*dal.User, error) {
-	u, err := c.u.WithContext(ctx).FindOne(id)
+func (c *UserModel) FindOne(ctx context.Context, id int64) (*dal.User, error) {
+	var u dal.User
+	err := c.db.WithContext(ctx).First(&u, id).Error
 	if err != nil {
 		return nil, err
 	}
-	stat, err := c.FindOneStat(ctx, u)
-	return stat, err
+	return c.FindOneStat(ctx, &u)
 }
 
 // FindMany find many users by ids
-func (c *CustomUserModel) FindMany(ctx context.Context, ids []int64) ([]*dal.User, error) {
-	result, err := c.u.WithContext(ctx).WithContext(ctx).FindMany(ids)
+// Even if there is no any user matched, it will return an empty slice
+func (c *UserModel) FindMany(ctx context.Context, ids []int64) ([]*dal.User, error) {
+	var users []*dal.User
+	err := c.db.WithContext(ctx).Where("id IN ?", ids).Find(&users).Error
 	if err != nil {
 		return nil, err
 	}
-	stat, err := c.FindManyStat(ctx, result)
-	return stat, err
+	return c.FindManyStat(ctx, users)
 }
 
 // FindByUsername find one user by username
-func (c *CustomUserModel) FindByUsername(ctx context.Context, username string) (*dal.User, error) {
-	return c.u.WithContext(ctx).FindByUsername(username)
+func (c *UserModel) FindByUsername(ctx context.Context, username string) (*dal.User, error) {
+	var u dal.User
+	return &u, c.db.WithContext(ctx).First(&u, "username = ?", username).Error
 }
 
 // Insert insert a user
-func (c *CustomUserModel) Insert(ctx context.Context, u *dal.User) error {
+func (c *UserModel) Insert(ctx context.Context, u *dal.User) error {
 	uid, err := c.uniqueID.NextID()
 	if err != nil {
 		return err
 	}
 	u.ID = uid
-	return c.u.WithContext(ctx).Create(u)
+	err = c.db.WithContext(ctx).Create(u).Error
+	return err
 }
 
 // Update update a user
-func (c *CustomUserModel) Update(context.Context, *dal.User) error {
+func (*UserModel) Update(context.Context, *dal.User) error {
 	return nil
 }
 
 // FindOneStat find one user stat by id from redis
-func (c *CustomUserModel) FindOneStat(ctx context.Context, user *dal.User) (*dal.User, error) {
-	if err := c.rds.HGetAll(ctx, GenRedisKey(TableUser, user.ID)).Scan(user); err != nil {
+func (c *UserModel) FindOneStat(ctx context.Context, user *dal.User) (*dal.User, error) {
+	if err := c.rdb.HGetAll(ctx, GenRedisKey(TableUser, user.ID)).Scan(user); err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
 // FindManyStat find many user stats by ids from redis
-func (c *CustomUserModel) FindManyStat(ctx context.Context, users []*dal.User) ([]*dal.User, error) {
-	cmder, err := c.rds.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+func (c *UserModel) FindManyStat(ctx context.Context, users []*dal.User) ([]*dal.User, error) {
+	cmder, err := c.rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		for _, u := range users {
 			pipe.HGetAll(ctx, GenRedisKey(TableUser, u.ID))
 		}
