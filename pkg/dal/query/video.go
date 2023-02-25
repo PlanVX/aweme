@@ -40,7 +40,8 @@ func (c *VideoModel) FindOne(ctx context.Context, id int64) (*dal.Video, error) 
 // FindMany find many videos by ids
 func (c *VideoModel) FindMany(ctx context.Context, ids []int64) ([]*dal.Video, error) {
 	var videos []*dal.Video
-	err := c.db.WithContext(ctx).Find(&videos, "id IN ?", ids).Error
+	err := c.db.WithContext(ctx).
+		Find(&videos, "id IN ?", ids).Error
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +102,8 @@ func (*VideoModel) Update(context.Context, *dal.Video) error {
 // Delete a video by its id and correct user id
 func (c *VideoModel) Delete(ctx context.Context, id int64, uid int64) error {
 	res := c.db.WithContext(ctx).
-		Where("id = ? AND user_id = ?", id, uid).
+		Where("id = ?", id).
+		Where("user_id = ?", uid).
 		Delete(&dal.Video{})
 	if res.Error != nil {
 		return res.Error

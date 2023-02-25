@@ -17,7 +17,17 @@ func TestNewRedisUniversalClient(t *testing.T) {
 		}{
 			Addr: []string{s.Addr()},
 		},
+		MySQL: struct {
+			Address  string `yaml:"address"`
+			Username string `yaml:"username"`
+			Password string `yaml:"password"`
+			Database string `yaml:"database"`
+		}{
+			Address: "test",
+		},
 	}
 	client := NewRedisUniversalClient(&c)
 	assert.NotNil(t, client)
+	dsn := genDsn(&c)
+	assert.Equal(t, "tcp(test)/?checkConnLiveness=false&parseTime=true&maxAllowedPacket=0", dsn)
 }

@@ -25,10 +25,7 @@ func TestCVideoModel_covertTime(t *testing.T) {
 }
 
 func TestVideoFind(t *testing.T) {
-	assertions := assert.New(t)
-	mock, db, rdb, err := mockDB(t)
-	assertions.NoError(err)
-	model := NewVideoModel(db, rdb)
+	assertions, mock, model := videoTest(t)
 	const findOne = "SELECT * FROM `videos` WHERE `videos`.`id` = ? ORDER BY `videos`.`id` LIMIT 1"
 	t.Run("FindOne success", func(t *testing.T) {
 		mock.ExpectQuery(findOne).
@@ -74,9 +71,9 @@ func TestVideoFind(t *testing.T) {
 			WillReturnRows(mock.NewRows([]string{"id", "title"}).AddRow(1, "test1").AddRow(2, "test2"))
 		videos, err := model.FindLatest(context.TODO(), ts, 2)
 		assertions.NoError(err)
-		assertions.Len(videos, 2)
-		assertions.Equal("test1", videos[0].Title)
+		assertions.NotEmpty(videos)
 		assertions.Equal("test2", videos[1].Title)
+		assertions.Equal("test1", videos[0].Title)
 	})
 	t.Run("Find latest nothing", func(t *testing.T) {
 		mock.ExpectQuery("SELECT * FROM `videos` WHERE created_at < ? ORDER BY created_at desc LIMIT 2").
@@ -99,20 +96,24 @@ func TestVideoFind(t *testing.T) {
 		assertions.Equal("test2", videos[1].Title)
 	})
 	t.Run("FindByUserID nothing", func(t *testing.T) {
-		mock.ExpectQuery(findByUserID).
-			WithArgs(int64(1)).
+		mock.ExpectQuery(findByUserID).WithArgs(5).
 			WillReturnRows(mock.NewRows([]string{"id", "title"}))
-		videos, err := model.FindByUserID(context.TODO(), 1, 2, 1)
+		videos, err := model.FindByUserID(context.TODO(), 5, 2, 1)
 		assertions.NoError(err)
 		assertions.Len(videos, 0)
 	})
 }
 
-func TestVideoExec(t *testing.T) {
+func videoTest(t *testing.T) (*assert.Assertions, sqlmock.Sqlmock, *VideoModel) {
 	assertions := assert.New(t)
 	mock, db, rdb, err := mockDB(t)
 	assertions.NoError(err)
 	model := NewVideoModel(db, rdb)
+	return assertions, mock, model
+}
+
+func TestVideoExec(t *testing.T) {
+	assertions, mock, model := videoTest(t)
 	const insertVideo = "INSERT INTO `videos` (`user_id`,`video_url`,`cover_url`,`title`,`created_at`,`id`) VALUES (?,?,?,?,?,?)"
 	v := &dal.Video{
 		UserID:   1,

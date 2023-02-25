@@ -13,21 +13,10 @@ import (
 
 // NewGormDB returns a new gorm db instance
 func NewGormDB(config *config.Config, logger *zap.Logger, lf fx.Lifecycle) (*gorm.DB, error) {
-	m := driver.Config{
-		User:                 config.MySQL.Username,
-		Passwd:               config.MySQL.Password,
-		Net:                  "tcp",
-		Addr:                 config.MySQL.Address,
-		DBName:               config.MySQL.Database,
-		AllowNativePasswords: true,
-		ParseTime:            true,
-	}
 	l := zapgorm2.New(logger)
 	l.SetAsDefault()
-	db, err := gorm.Open(mysql.Open(m.FormatDSN()), &gorm.Config{
-		SkipDefaultTransaction: true,
-		Logger:                 l,
-	})
+	db, err := gorm.Open(mysql.Open(genDsn(config)),
+		&gorm.Config{SkipDefaultTransaction: true, Logger: l})
 	lf.Append(fx.Hook{OnStop: func(ctx context.Context) error {
 		sqlDB, e := db.DB()
 		if e != nil {
@@ -39,4 +28,17 @@ func NewGormDB(config *config.Config, logger *zap.Logger, lf fx.Lifecycle) (*gor
 		db = db.Debug()
 	}
 	return db, err
+}
+
+func genDsn(config *config.Config) string {
+	m := driver.Config{
+		User:                 config.MySQL.Username,
+		Passwd:               config.MySQL.Password,
+		Net:                  "tcp",
+		Addr:                 config.MySQL.Address,
+		DBName:               config.MySQL.Database,
+		AllowNativePasswords: true,
+		ParseTime:            true,
+	}
+	return m.FormatDSN()
 }

@@ -40,7 +40,9 @@ func (c *UserModel) FindOne(ctx context.Context, id int64) (*dal.User, error) {
 // Even if there is no any user matched, it will return an empty slice
 func (c *UserModel) FindMany(ctx context.Context, ids []int64) ([]*dal.User, error) {
 	var users []*dal.User
-	err := c.db.WithContext(ctx).Where("id IN ?", ids).Find(&users).Error
+	err := c.db.WithContext(ctx).
+		Where("id IN ?", ids).
+		Find(&users).Error
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +73,8 @@ func (*UserModel) Update(context.Context, *dal.User) error {
 
 // FindOneStat find one user stat by id from redis
 func (c *UserModel) FindOneStat(ctx context.Context, user *dal.User) (*dal.User, error) {
-	if err := c.rdb.HGetAll(ctx, GenRedisKey(TableUser, user.ID)).Scan(user); err != nil {
+	err := c.rdb.HGetAll(ctx, GenRedisKey(TableUser, user.ID)).Scan(user)
+	if err != nil {
 		return nil, err
 	}
 	return user, nil

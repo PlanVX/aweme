@@ -10,10 +10,7 @@ import (
 )
 
 func TestCommentFind(t *testing.T) {
-	assertions := assert.New(t)
-	mock, db, rdb, err := mockDB(t)
-	assertions.NoError(err)
-	model := NewCommentModel(db, rdb)
+	assertions, mock, model := commentTest(t)
 	const findCommentsByVideoID = "SELECT * FROM `comments` WHERE video_id = ? LIMIT 2 OFFSET 10"
 	t.Run("FindByVideoID success", func(t *testing.T) {
 		// video_id int64,limit int,offset int
@@ -28,19 +25,24 @@ func TestCommentFind(t *testing.T) {
 	})
 	t.Run("FindByVideoID nothing", func(t *testing.T) {
 		mock.ExpectQuery(findCommentsByVideoID).
-			WithArgs(int64(1)).
-			WillReturnRows(mock.NewRows([]string{"id", "video_id"}))
-		comment, err := model.FindByVideoID(context.TODO(), 1, 2, 10)
+			WithArgs(8).
+			WillReturnRows(mock.NewRows([]string{"id"}))
+		comment, err := model.FindByVideoID(context.TODO(), 8, 2, 10)
 		assertions.NoError(err)
 		assertions.Len(comment, 0)
 	})
 }
 
-func TestCommentExec(t *testing.T) {
+func commentTest(t *testing.T) (*assert.Assertions, sqlmock.Sqlmock, *CommentModel) {
 	assertions := assert.New(t)
 	mock, db, rdb, err := mockDB(t)
 	assertions.NoError(err)
 	model := NewCommentModel(db, rdb)
+	return assertions, mock, model
+}
+
+func TestCommentExec(t *testing.T) {
+	assertions, mock, model := commentTest(t)
 	const insertComment = "INSERT INTO `comments` (`content`,`video_id`,`user_id`,`created_at`,`id`) VALUES (?,?,?,?,?)"
 	c := &dal.Comment{
 		VideoID: 1,
@@ -72,7 +74,9 @@ func TestCommentExec(t *testing.T) {
 		mock.ExpectBegin()
 		mock.ExpectExec(deleteComment).
 			WithArgs(c.ID, c.UserID).
-			WillReturnResult(sqlmock.NewResult(1, 1))
+			WillReturnResult(
+				sqlmock.NewResult(1, 1),
+			)
 		mock.ExpectCommit()
 		err := model.Delete(context.TODO(), c.ID, c.UserID, c.VideoID)
 		assertions.NoError(err)
@@ -88,9 +92,8 @@ func TestCommentExec(t *testing.T) {
 	})
 	t.Run("Delete nothing", func(t *testing.T) {
 		mock.ExpectBegin()
-		mock.ExpectExec(deleteComment).
-			WithArgs(c.ID, c.UserID).
-			WillReturnResult(sqlmock.NewResult(1, 0))
+		mock.ExpectExec(deleteComment).WithArgs(c.ID, c.UserID).
+			WillReturnResult(sqlmock.NewResult(0, 0))
 		mock.ExpectCommit()
 		err := model.Delete(context.TODO(), c.ID, c.UserID, c.VideoID)
 		assertions.Error(err)
