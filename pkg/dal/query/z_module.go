@@ -14,4 +14,6 @@ var Module = fx.Module("data access layer",
 		NewGormDB,
 		NewRedisUniversalClient,
 		fx.Annotate(NewUserModel, fx.As(new(dal.UserModel))),
+		fx.Annotate(NewCommentModel, fx.As(new(dal.CommentModel))),
+		fx.Annotate(NewVideoModel, fx.As(new(dal.VideoModel))),
 	))
