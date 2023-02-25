@@ -1,0 +1,32 @@
+before:
+  hooks:
+    - sh scripts/codegen.sh
+    - go mod tidy
+builds:
+  - env:
+      - CGO_ENABLED=0
+    targets:
+      - windows_amd64
+      - linux_amd64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+    main: ./cmd/main.go
+    binary: aweme
+archives:
+  - files:
+      - LICENSE
+      - configs/*
+      - readme.md
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
