@@ -8,7 +8,8 @@ import (
 // NewRedisUniversalClient returns a redis client
 func NewRedisUniversalClient(config *config.Config) redis.UniversalClient {
 	return redis.NewUniversalClient(&redis.UniversalOptions{
-		Addrs: config.Redis.Addr,
-		DB:    config.Redis.DB,
+		Addrs:    config.Redis.Addr,
+		Password: config.Redis.Password,
+		DB:       config.Redis.DB,
 	})
 }

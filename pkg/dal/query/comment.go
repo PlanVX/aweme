@@ -2,9 +2,8 @@ package query
 
 import (
 	"context"
-	"github.com/redis/go-redis/v9"
-
 	"github.com/PlanVX/aweme/pkg/dal"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -13,15 +12,15 @@ var _ dal.CommentModel = (*CommentModel)(nil)
 
 // CommentModel is the implementation of dal.CommentModel
 type CommentModel struct {
-	queries  comment
+	db       *gorm.DB
 	rdb      redis.UniversalClient
 	uniqueID *UniqueID
 }
 
-// NewCommentModel creates a new comment model
-func NewCommentModel(c comment, rdb redis.UniversalClient) *CommentModel {
+// NewCommentModel is the constructor of CommentModel
+func NewCommentModel(db *gorm.DB, rdb redis.UniversalClient) *CommentModel {
 	return &CommentModel{
-		queries:  c,
+		db:       db,
 		rdb:      rdb,
 		uniqueID: NewUniqueID(),
 	}
@@ -29,17 +28,26 @@ func NewCommentModel(c comment, rdb redis.UniversalClient) *CommentModel {
 
 // FindByVideoID finds comments by video id
 func (c *CommentModel) FindByVideoID(ctx context.Context, videoID int64, limit, offset int) ([]*dal.Comment, error) {
-	return c.queries.WithContext(ctx).FindByVideoID(videoID, limit, offset)
+	var comments []*dal.Comment
+	err := c.db.WithContext(ctx).
+		Where("video_id = ?", videoID).
+		Limit(limit).
+		Offset(offset).
+		Find(&comments).Error
+	if err != nil {
+		return nil, err
+	}
+	return comments, nil
 }
 
 // Insert inserts a comment
 func (c *CommentModel) Insert(ctx context.Context, comment *dal.Comment) error {
-	uid, err := c.uniqueID.NextID()
+	id, err := c.uniqueID.NextID()
 	if err != nil {
 		return err
 	}
-	comment.ID = uid
-	err = c.queries.WithContext(ctx).Create(comment)
+	comment.ID = id
+	err = c.db.WithContext(ctx).Create(comment).Error
 	if err != nil {
 		return err
 	}
@@ -49,11 +57,15 @@ func (c *CommentModel) Insert(ctx context.Context, comment *dal.Comment) error {
 
 // Delete deletes a comment by id and user id
 func (c *CommentModel) Delete(ctx context.Context, id int64, uid int64, vid int64) error {
-	if r, err := c.queries.WithContext(ctx).DeleteByIDAndUserID(id, uid); err != nil {
-		return err
-	} else if r == 0 { // not found means no rows affected
+	res := c.db.WithContext(ctx).
+		Where("id = ? AND user_id = ?", id, uid).
+		Delete(&dal.Comment{})
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
 		return gorm.ErrRecordNotFound
 	}
 	c.rdb.HIncrBy(ctx, GenRedisKey(TableVideo, vid), CountComment, -1)
-	return nil // success
+	return nil
 }

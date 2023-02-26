@@ -10,69 +10,96 @@ import (
 // check if LikeModel implements dal.LikeModel
 var _ dal.LikeModel = (*LikeModel)(nil)
 
-// LikeModel is the like model implementation for dal.LikeModel
+// LikeModel is the implementation of dal.LikeModel
 type LikeModel struct {
-	queries  like
+	db       *gorm.DB
 	rdb      redis.UniversalClient
 	uniqueID *UniqueID
 }
 
-// NewLikeModel creates a new like model
-func NewLikeModel(db like, rdb redis.UniversalClient) *LikeModel {
+// NewLikeModel creates a new comment like model
+func NewLikeModel(db *gorm.DB, rdb redis.UniversalClient) *LikeModel {
 	return &LikeModel{
-		queries:  db,
+		db:       db,
 		rdb:      rdb,
 		uniqueID: NewUniqueID(),
 	}
 }
 
-// Insert inserts a like
-func (l *LikeModel) Insert(ctx context.Context, like *dal.Like) error {
-	id, err := l.uniqueID.NextID()
+// FindByVideoIDAndUserID finds a like by video id and user id
+func (c *LikeModel) FindByVideoIDAndUserID(ctx context.Context, vid, uid int64) (*dal.Like, error) {
+	var like dal.Like
+	err := c.db.WithContext(ctx).
+		Where("video_id = ?", vid).
+		Where("user_id = ?", uid).
+		First(&like).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	like.ID = id
-	if err := l.queries.WithContext(ctx).Create(like); err != nil {
-		return err
-	}
-	l.rdb.HIncrBy(ctx, GenRedisKey(TableVideo, like.VideoID), CountLike, 1)
-	l.rdb.HIncrBy(ctx, GenRedisKey(TableUser, like.UserID), CountLike, 1)
-	return nil
-}
-
-// Delete deletes a like by video id and user id
-func (l *LikeModel) Delete(ctx context.Context, vid, uid int64) error {
-	if r, err := l.queries.WithContext(ctx).DeleteByVideoIDAndUserID(vid, uid); err != nil {
-		return err
-	} else if r == 0 { // not found means no rows affected
-		return gorm.ErrRecordNotFound
-	}
-	l.rdb.HIncrBy(ctx, GenRedisKey(TableVideo, vid), CountLike, -1)
-	l.rdb.HIncrBy(ctx, GenRedisKey(TableUser, uid), CountLike, -1)
-	return nil
+	return &like, nil
 }
 
 // FindVideoIDsByUserID finds liked video ids by user id
-func (l *LikeModel) FindVideoIDsByUserID(ctx context.Context, uid int64, limit, offset int) ([]int64, error) {
-	return l.queries.WithContext(ctx).FindVideoIDsByUserID(uid, limit, offset)
-}
-
-// FindByVideoIDAndUserID finds a like by video id and user id
-func (l *LikeModel) FindByVideoIDAndUserID(ctx context.Context, vid, uid int64) (*dal.Like, error) {
-	return l.queries.WithContext(ctx).FindByVideoIDAndUserID(vid, uid)
+func (c *LikeModel) FindVideoIDsByUserID(ctx context.Context, uid int64, limit, offset int) ([]int64, error) {
+	var likes []int64
+	err := c.db.WithContext(ctx).
+		Model(&dal.Like{}).
+		Table("likes").
+		Where("user_id = ?", uid).
+		Order("created_at desc").
+		Limit(limit).
+		Offset(offset).
+		Pluck("video_id", &likes).Error
+	if err != nil {
+		return nil, err
+	}
+	return likes, nil
 }
 
 // FindWhetherLiked finds a like record by video ids and user id
 // return a list of video id that liked by userid
-func (l *LikeModel) FindWhetherLiked(ctx context.Context, userid int64, videoID []int64) ([]int64, error) {
-	var result []int64
-	err := l.queries.WithContext(ctx).
-		Select(l.queries.VideoID).
-		Where(l.queries.UserID.Eq(userid), l.queries.VideoID.In(videoID...)).
-		Scan(&result)
+func (c *LikeModel) FindWhetherLiked(ctx context.Context, userid int64, videoID []int64) ([]int64, error) {
+	var likes []int64
+	err := c.db.WithContext(ctx).
+		Model(&dal.Like{}).
+		Where("user_id = ?", userid).
+		Where("video_id IN ?", videoID).
+		Pluck("video_id", &likes).Error
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	return likes, nil
+}
+
+// Insert inserts a like
+func (c *LikeModel) Insert(ctx context.Context, like *dal.Like) error {
+	id, err := c.uniqueID.NextID()
+	if err != nil {
+		return err
+	}
+	like.ID = id
+	err = c.db.WithContext(ctx).Create(like).Error
+	if err != nil {
+		return err
+	}
+	c.rdb.HIncrBy(ctx, GenRedisKey(TableVideo, like.VideoID), CountLike, 1)
+	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, like.UserID), CountLike, 1)
+	return nil
+}
+
+// Delete deletes a like by video id and user id
+func (c *LikeModel) Delete(ctx context.Context, vid, uid int64) error {
+	res := c.db.WithContext(ctx).
+		Where("video_id = ?", vid).
+		Where("user_id = ?", uid).
+		Delete(&dal.Like{})
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	c.rdb.HIncrBy(ctx, GenRedisKey(TableVideo, vid), CountLike, -1)
+	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, uid), CountLike, -1)
+	return nil
 }

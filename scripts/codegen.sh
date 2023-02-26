@@ -10,7 +10,3 @@ if [ -n "$MOCKERY" ]; then
   go install github.com/vektra/mockery/v2@v2.20.0
   go generate ./...
 fi
-
-# generate gorm queries
-go mod tidy
-go run scripts/db/gen.go
