@@ -22,7 +22,8 @@ services:
     build:
       context: .
       dockerfile: ./scripts/Dockerfile
-    image: sixwaaaay/aweme:latest
+    # for deployment, comment out the build section and use the image below
+    #image: planvx/aweme:latest
     # Load environment variables from .env file
     env_file:
       - ./scripts/.env
@@ -34,10 +35,8 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - mysql
+      - redis
     restart: always
     networks:
       - backend
