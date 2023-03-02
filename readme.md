@@ -39,6 +39,41 @@
 - scripts: 该目录包含项目的脚本文件，例如：代码生成脚本、数据库脚本等。
 - scripts/.env 文件包含了作为环境变量的配置信息，请按需填写，例如：数据库连接信息、密钥等。
 
+## kubernetes 部署
+
+以下操作在默认的 namespace 下进行，如果需要部署到其他 namespace，请在命令中指定。
+
+1. 创建配置
+
+   ```bash
+   kubectl create cm aweme-config --from-file=aweme-app-config.yaml=configs/config.yml --from-file=aweme-app-schema.sql=scripts/schema.sql
+   ```
+
+2. 创建 secret，其中包括了数据库连接信息、密钥等
+
+   ```bash
+   kubectl -f deploy/secret.yaml
+   ```
+
+3. 部署 MySQL 和 redis 及相关 headless service
+
+   ```bash
+   kubectl -f deploy/mysql.yaml
+   kubectl -f deploy/redis.yaml
+   ```
+
+4. 部署应用及相关 service
+
+   ```bash
+   kubectl -f deploy/aweme.yaml
+   ```
+
+5. （可选）配置 HPA 水平自动伸缩
+
+   ```bash
+   kubectl -f deploy/aweme-hpa.yaml
+   ```
+
 ## 运行
 
 项目运行可参考以下步骤：

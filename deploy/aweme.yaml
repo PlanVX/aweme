@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aweme-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aweme
+  template:
+    metadata:
+      labels:
+        app: aweme
+    spec:
+      containers:
+        - name: aweme-app
+          image: planvx/aweme:latest
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 2048Mi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+          env:
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  key: MYSQL_USER
+                  name: aweme-secret
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: MYSQL_PASSWORD
+                  name: aweme-secret
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: MYSQL_DATABASE
+            - name: MYSQL_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: MYSQL_ADDRESS
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: JWT_SECRET
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: S3_ACCESS_KEY
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: S3_SECRET_KEY
+            - name: S3_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: S3_BUCKET
+            - name: S3_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: S3_REGION
+            - name: S3_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: S3_ENDPOINT
+            - name: S3_PARTITION
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: S3_PARTITION
+            - name: REDIS_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: REDIS_ADDRESS
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: REDIS_PASSWORD
+            - name: REDIS_DB
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: REDIS_DB
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/configs
+      volumes:
+        - name: config-volume
+          configMap:
+            name: aweme-config
+            items:
+              - key: aweme-app-config.yaml
+                path: config.yml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aweme
+spec:
+  selector:
+    app: aweme
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  type: ClusterIP

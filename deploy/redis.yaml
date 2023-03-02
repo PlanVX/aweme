@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: aweme-redis
+spec:
+  replicas: 1
+  serviceName: aweme-redis
+  selector:
+    matchLabels:
+      app: aweme-redis
+  template:
+    metadata:
+      labels:
+        app: aweme-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-data
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aweme-redis
+spec:
+  selector:
+    app: aweme-redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      name: redis
+  clusterIP: None

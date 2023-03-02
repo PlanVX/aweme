@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: aweme-mysql
+spec:
+  replicas: 1
+  serviceName: aweme-mysql
+  selector:
+    matchLabels:
+      app: aweme-mysql
+  template:
+    metadata:
+      labels:
+        app: aweme-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:latest
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aweme-secret
+                  key: MYSQL_PASSWORD
+          ports:
+            - containerPort: 3306
+
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: schema-sql
+              mountPath: /docker-entrypoint-initdb.d/
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-data
+        - name: schema-sql
+          configMap:
+            name: aweme-config
+            items:
+              - key: aweme-app-schema.sql
+                path: schema.sql
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aweme-mysql
+spec:
+  selector:
+    app: aweme-mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      name: mysql
+  clusterIP: None
