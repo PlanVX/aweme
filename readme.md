@@ -15,7 +15,7 @@
 .
 ├── .github
 ├── cmd
-│   └── main.go
+│   └── aweme/main.go
 ├── configs
 │   └── config.yml
 ├── docker-compose.yml
@@ -31,11 +31,11 @@
 ```
 
 - .github/workflows: 该目录包含了 GitHub Actions 的配置文件。
-- cmd: 该目录包含了项目的入口文件，即 main() 函数所在的文件。
+- cmd: 该目录包含了项目的入口包，即 main() 函数所在。
 - configs: 该目录包含了项目的配置文件，例如：数据库配置、日志配置等。
 - docker-compose.yml: 该文件用于在 Docker 环境下运行项目时所需的配置。
 - docs: 该目录包含项目的 API 文档, 可以使用 codegen.sh 脚本生成。
-- pkg: 该目录包含项目的代码库，例如：API 定义、数据访问层、逻辑层等。
+- internal: 该目录包含项目的内部代码逻辑，例如：API 定义、数据访问层、逻辑层等。
 - scripts: 该目录包含项目的脚本文件，例如：代码生成脚本、数据库脚本等。
 - scripts/.env 文件包含了作为环境变量的配置信息，请按需填写，例如：数据库连接信息、密钥等。
 
