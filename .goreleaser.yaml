@@ -10,7 +10,7 @@ builds:
       - linux_amd64
     ldflags:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
-    main: ./cmd/main.go
+    main: ./cmd/aweme/main.go
     binary: aweme
 archives:
   - files:

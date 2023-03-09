@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # generate swagger documentation
 go install github.com/swaggo/swag/cmd/swag@latest
-swag init -g cmd/main.go -p snakecase
+swag init -g cmd/aweme/main.go -p snakecase
 
 # optional: generate mocks for testing
 # mockery code generation

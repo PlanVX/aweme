@@ -37,7 +37,7 @@ jobs:
 
       - name: Go Build
         run: |
-          go build  -ldflags="-w -s"  -o  app cmd/main.go
+          go build  -ldflags="-w -s"  -o  app cmd/aweme/main.go
 
   container:
     runs-on: ubuntu-latest
