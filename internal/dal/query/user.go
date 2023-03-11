@@ -29,7 +29,7 @@ func NewUserModel(db *gorm.DB, rdb redis.UniversalClient) *UserModel {
 // FindOne find one user by id
 func (c *UserModel) FindOne(ctx context.Context, id int64) (*dal.User, error) {
 	var u dal.User
-	err := c.db.WithContext(ctx).First(&u, id).Error
+	err := c.db.WithContext(ctx).Take(&u, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,8 @@ func (c *UserModel) FindMany(ctx context.Context, ids []int64) ([]*dal.User, err
 // FindByUsername find one user by username
 func (c *UserModel) FindByUsername(ctx context.Context, username string) (*dal.User, error) {
 	var u dal.User
-	return &u, c.db.WithContext(ctx).First(&u, "username = ?", username).Error
+	return &u, c.db.WithContext(ctx).Select("id", "username", "password").Take(&u, "username = ?", username).Error
+
 }
 
 // Insert insert a user

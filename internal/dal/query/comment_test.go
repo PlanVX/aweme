@@ -11,7 +11,7 @@ import (
 
 func TestCommentFind(t *testing.T) {
 	assertions, mock, model := commentTest(t)
-	const findCommentsByVideoID = "SELECT * FROM `comments` WHERE video_id = ? LIMIT 2 OFFSET 10"
+	const findCommentsByVideoID = "SELECT `comments`.`id`,`comments`.`content`,`comments`.`video_id`,`comments`.`user_id`,`comments`.`created_at` FROM `comments` WHERE video_id = ? LIMIT 2 OFFSET 10"
 	t.Run("FindByVideoID success", func(t *testing.T) {
 		// video_id int64,limit int,offset int
 		mock.ExpectQuery(findCommentsByVideoID).
@@ -50,51 +50,41 @@ func TestCommentExec(t *testing.T) {
 		UserID:  1,
 	}
 	t.Run("Insert success", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec(insertComment).
 			WithArgs(c.Content, c.VideoID, c.UserID, sqlmock.AnyArg(), sqlmock.AnyArg()).
 			WillReturnResult(sqlmock.NewResult(1, 1))
-		mock.ExpectCommit()
 		err := model.Insert(context.TODO(), c)
 		assertions.NoError(err)
 		assertions.NotZero(c.ID)
 		assertions.NotZero(c.CreatedAt)
 	})
 	t.Run("Insert failed", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec(insertComment).
 			WithArgs(c.Content, c.VideoID, c.UserID, sqlmock.AnyArg(), sqlmock.AnyArg()).
 			WillReturnError(errors.New("failed"))
-		mock.ExpectRollback()
 		err := model.Insert(context.TODO(), c)
 		assertions.Error(err)
 	})
 	const deleteComment = "DELETE FROM `comments` WHERE id = ? AND user_id = ?"
 	t.Run("Delete success", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec(deleteComment).
 			WithArgs(c.ID, c.UserID).
 			WillReturnResult(
 				sqlmock.NewResult(1, 1),
 			)
-		mock.ExpectCommit()
 		err := model.Delete(context.TODO(), c.ID, c.UserID, c.VideoID)
 		assertions.NoError(err)
 	})
 	t.Run("Delete failed", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec(deleteComment).
 			WithArgs(c.ID, c.UserID).
 			WillReturnError(errors.New("failed"))
-		mock.ExpectRollback()
 		err := model.Delete(context.TODO(), c.ID, c.UserID, c.VideoID)
 		assertions.Error(err)
 	})
 	t.Run("Delete nothing", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec(deleteComment).WithArgs(c.ID, c.UserID).
 			WillReturnResult(sqlmock.NewResult(0, 0))
-		mock.ExpectCommit()
 		err := model.Delete(context.TODO(), c.ID, c.UserID, c.VideoID)
 		assertions.Error(err)
 	})

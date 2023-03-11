@@ -19,7 +19,7 @@ func TestUserFind(t *testing.T) {
 	mock, gormDB, rdb, err := mockDB(t)
 	assertions.NoError(err)
 	model := NewUserModel(gormDB, rdb)
-	const findOneUser = "SELECT * FROM `users` WHERE `users`.`id` = ? ORDER BY `users`.`id` LIMIT 1"
+	const findOneUser = "SELECT `users`.`id`,`users`.`username`,`users`.`password`,`users`.`avatar`,`users`.`background_image`,`users`.`signature` FROM `users` WHERE `users`.`id` = ? LIMIT 1"
 	t.Run("FindOne success", func(t *testing.T) {
 		mock.ExpectQuery(findOneUser).
 			WithArgs(1).
@@ -33,12 +33,12 @@ func TestUserFind(t *testing.T) {
 			WithArgs(1).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "username"}))
 		user, err := model.FindOne(context.TODO(), 1)
-		// First() method will return gorm.ErrRecordNotFound if no record found
+		// method will return gorm.ErrRecordNotFound if no record found
 		assertions.Error(err)
 		assertions.Equal(gorm.ErrRecordNotFound, err)
 		assertions.Nil(user)
 	})
-	const findManyUser = "SELECT * FROM `users` WHERE id IN (?,?)"
+	const findManyUser = "SELECT `users`.`id`,`users`.`username`,`users`.`password`,`users`.`avatar`,`users`.`background_image`,`users`.`signature` FROM `users` WHERE id IN (?,?)"
 	t.Run("FindMany success", func(t *testing.T) {
 		mock.ExpectQuery(findManyUser).
 			WithArgs(1, 2).
@@ -59,7 +59,7 @@ func TestUserFind(t *testing.T) {
 		assertions.Len(users, 0)
 	})
 	t.Run("FindByUsername success", func(t *testing.T) {
-		const findByUsername = "SELECT * FROM `users` WHERE username = ? ORDER BY `users`.`id` LIMIT 1"
+		const findByUsername = "SELECT `id`,`username`,`password` FROM `users` WHERE username = ? LIMIT 1"
 		mock.ExpectQuery(findByUsername).
 			WithArgs("test").
 			WillReturnRows(sqlmock.NewRows([]string{"id", "username"}).AddRow(1, "test"))
@@ -77,7 +77,10 @@ func mockDB(t *testing.T) (sqlmock.Sqlmock, *gorm.DB, redis.UniversalClient, err
 	gormDB, err := gorm.Open(mysql.New(mysql.Config{
 		SkipInitializeWithVersion: true,
 		Conn:                      db,
-	}))
+	}), &gorm.Config{
+		QueryFields:            true,
+		SkipDefaultTransaction: true,
+	})
 	s := miniredis.RunT(t)
 	rdb := redis.NewUniversalClient(&redis.UniversalOptions{
 		Addrs: []string{s.Addr()},

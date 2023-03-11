@@ -48,11 +48,9 @@ func TestRelationExec(t *testing.T) {
 		FollowTo: 1,
 	}
 	t.Run("Insert success", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec(InsertRelation).
 			WithArgs(rel.UserID, rel.FollowTo, sqlmock.AnyArg(), sqlmock.AnyArg()).
 			WillReturnResult(sqlmock.NewResult(1, 1))
-		mock.ExpectCommit()
 		err := model.Insert(context.TODO(), rel)
 		assertions.NoError(err)
 		assertions.NotZero(rel.CreatedAt)
@@ -60,11 +58,9 @@ func TestRelationExec(t *testing.T) {
 	})
 	const DeleteRelation = "DELETE FROM `relations` WHERE user_id = ? AND follow_to = ?"
 	t.Run("Delete success", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec(DeleteRelation).
 			WithArgs(rel.UserID, rel.FollowTo).
 			WillReturnResult(sqlmock.NewResult(1, 1))
-		mock.ExpectCommit()
 		err := model.Delete(context.TODO(), rel.UserID, rel.FollowTo)
 		assertions.NoError(err)
 	})
