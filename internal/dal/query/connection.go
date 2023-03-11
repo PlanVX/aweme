@@ -16,7 +16,7 @@ func NewGormDB(config *config.Config, logger *zap.Logger, lf fx.Lifecycle) (*gor
 	l := zapgorm2.New(logger)
 	l.SetAsDefault()
 	db, err := gorm.Open(mysql.Open(genDsn(config)),
-		&gorm.Config{SkipDefaultTransaction: true, Logger: l})
+		&gorm.Config{SkipDefaultTransaction: true, Logger: l, QueryFields: true})
 	lf.Append(fx.Hook{OnStop: func(ctx context.Context) error {
 		sqlDB, e := db.DB()
 		if e != nil {

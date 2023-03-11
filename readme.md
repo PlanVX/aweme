@@ -2,12 +2,12 @@
 
 一个轻量级短视频应用程序后端
 
-[![Codacy Badge](https://img.shields.io/codacy/grade/581a7a1d9685419eb6fef5afb636544d?style=for-the-badge)](https://www.codacy.com/gh/PlanVX/aweme/dashboard?utm_source=github.com&utm_medium=referral&utm_content=PlanVX/aweme&utm_campaign=Badge_Grade)
+[![Codacy Badge](https://img.shields.io/codacy/grade/581a7a1d9685419eb6fef5afb636544d?style=for-the-badge&logo=codacy)](https://app.codacy.com/gh/PlanVX/aweme/dashboard)
 [![Go Report Card](https://goreportcard.com/badge/github.com/PlanVX/aweme?style=for-the-badge)](https://goreportcard.com/report/github.com/PlanVX/aweme)
-[![build](https://img.shields.io/github/actions/workflow/status/PlanVx/aweme/ci.yaml?style=for-the-badge)](https://github.com/PlanVX/aweme/actions/workflows/ci.yaml)
-[![license](https://img.shields.io/github/license/PlanVX/aweme?style=for-the-badge)](https://github.com/PlanVX/aweme/blob/main/LICENSE)
-[![Codecov](https://img.shields.io/codecov/c/github/PlanVX/aweme?style=for-the-badge)](https://codecov.io/gh/PlanVX/aweme)
-[![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/planvx/aweme?style=for-the-badge)](https://hub.docker.com/r/planvx/aweme)
+[![build](https://img.shields.io/github/actions/workflow/status/PlanVx/aweme/ci.yaml?style=for-the-badge&logo=githubactions)](https://github.com/PlanVX/aweme/actions/workflows/ci.yaml)
+[![license](https://img.shields.io/github/license/PlanVX/aweme?style=for-the-badge&logo=apache)](https://github.com/PlanVX/aweme/blob/main/LICENSE)
+[![Codecov](https://img.shields.io/codecov/c/github/PlanVX/aweme?style=for-the-badge&logo=codecov)](https://codecov.io/gh/PlanVX/aweme)
+[![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/planvx/aweme?style=for-the-badge&logo=docker)](https://hub.docker.com/r/planvx/aweme)
 
 ## 项目结构
 
@@ -20,7 +20,7 @@
 │   └── config.yml
 ├── docker-compose.yml
 ├── docs
-├── pkg
+├── internal
 ├── readme.md
 ├── renovate.json
 └── scripts

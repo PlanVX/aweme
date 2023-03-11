@@ -30,7 +30,7 @@ func NewVideoModel(db *gorm.DB, rdb redis.UniversalClient) *VideoModel {
 // FindOne find one video by id
 func (c *VideoModel) FindOne(ctx context.Context, id int64) (*dal.Video, error) {
 	var v dal.Video
-	err := c.db.WithContext(ctx).First(&v, id).Error
+	err := c.db.WithContext(ctx).Take(&v, id).Error
 	if err != nil {
 		return nil, err
 	}

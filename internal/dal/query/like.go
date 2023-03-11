@@ -29,10 +29,11 @@ func NewLikeModel(db *gorm.DB, rdb redis.UniversalClient) *LikeModel {
 // FindByVideoIDAndUserID finds a like by video id and user id
 func (c *LikeModel) FindByVideoIDAndUserID(ctx context.Context, vid, uid int64) (*dal.Like, error) {
 	var like dal.Like
-	err := c.db.WithContext(ctx).
+	err := c.db.
+		WithContext(ctx).
 		Where("video_id = ?", vid).
 		Where("user_id = ?", uid).
-		First(&like).Error
+		Take(&like).Error
 	if err != nil {
 		return nil, err
 	}

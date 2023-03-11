@@ -26,7 +26,9 @@ func TestCVideoModel_covertTime(t *testing.T) {
 
 func TestVideoFind(t *testing.T) {
 	assertions, mock, model := videoTest(t)
-	const findOne = "SELECT * FROM `videos` WHERE `videos`.`id` = ? ORDER BY `videos`.`id` LIMIT 1"
+	const findOne = "SELECT `videos`.`id`,`videos`.`user_id`,`videos`.`video_url`,`videos`.`cover_url`,`videos`.`title`,`videos`.`created_at` " +
+		"FROM `videos` " +
+		"WHERE `videos`.`id` = ? LIMIT 1"
 	t.Run("FindOne success", func(t *testing.T) {
 		mock.ExpectQuery(findOne).
 			WithArgs(1).
@@ -40,12 +42,15 @@ func TestVideoFind(t *testing.T) {
 			WithArgs(1).
 			WillReturnRows(mock.NewRows([]string{"id", "title"}))
 		video, err := model.FindOne(context.TODO(), 1)
-		// First() method will return gorm.ErrRecordNotFound if no record found
+		// method will return gorm.ErrRecordNotFound if no record found
 		assertions.Error(err)
 		assertions.Nil(video)
 	})
+	const findMany = "SELECT `videos`.`id`,`videos`.`user_id`,`videos`.`video_url`,`videos`.`cover_url`,`videos`.`title`,`videos`.`created_at` " +
+		"FROM `videos` " +
+		"WHERE id IN (?,?)"
 	t.Run("FindMany success", func(t *testing.T) {
-		mock.ExpectQuery("SELECT * FROM `videos` WHERE id IN (?,?)").
+		mock.ExpectQuery(findMany).
 			WithArgs(1, 2).
 			WillReturnRows(mock.NewRows([]string{"id", "title"}).AddRow(1, "test1").AddRow(2, "test2"))
 		videos, err := model.FindMany(context.TODO(), []int64{1, 2})
@@ -55,7 +60,7 @@ func TestVideoFind(t *testing.T) {
 		assertions.Equal("test2", videos[1].Title)
 	})
 	t.Run("FindMany nothing", func(t *testing.T) {
-		mock.ExpectQuery("SELECT * FROM `videos` WHERE id IN (?,?)").
+		mock.ExpectQuery(findMany).
 			WithArgs(1, 2).
 			WillReturnRows(mock.NewRows([]string{"id", "title"}))
 		videos, err := model.FindMany(context.TODO(), []int64{1, 2})
@@ -65,8 +70,9 @@ func TestVideoFind(t *testing.T) {
 	ts := int64(1609459200000)
 	//layout := "2006-01-02 15:04:05 -0700 MST"
 	arg := time.Unix(0, ts*int64(time.Millisecond))
+	const findLatest = "SELECT `videos`.`id`,`videos`.`user_id`,`videos`.`video_url`,`videos`.`cover_url`,`videos`.`title`,`videos`.`created_at` FROM `videos` WHERE created_at < ? ORDER BY created_at desc LIMIT 2"
 	t.Run("Find latest", func(t *testing.T) {
-		mock.ExpectQuery("SELECT * FROM `videos` WHERE created_at < ? ORDER BY created_at desc LIMIT 2").
+		mock.ExpectQuery(findLatest).
 			WithArgs(arg).
 			WillReturnRows(mock.NewRows([]string{"id", "title"}).AddRow(1, "test1").AddRow(2, "test2"))
 		videos, err := model.FindLatest(context.TODO(), ts, 2)
@@ -76,14 +82,14 @@ func TestVideoFind(t *testing.T) {
 		assertions.Equal("test1", videos[0].Title)
 	})
 	t.Run("Find latest nothing", func(t *testing.T) {
-		mock.ExpectQuery("SELECT * FROM `videos` WHERE created_at < ? ORDER BY created_at desc LIMIT 2").
+		mock.ExpectQuery(findLatest).
 			WithArgs(arg).
 			WillReturnRows(mock.NewRows([]string{"id", "title"}))
 		videos, err := model.FindLatest(context.TODO(), ts, 2)
 		assertions.NoError(err)
 		assertions.Len(videos, 0)
 	})
-	const findByUserID = "SELECT * FROM `videos` WHERE user_id = ? ORDER BY created_at desc LIMIT 2 OFFSET 1"
+	const findByUserID = "SELECT `videos`.`id`,`videos`.`user_id`,`videos`.`video_url`,`videos`.`cover_url`,`videos`.`title`,`videos`.`created_at` FROM `videos` WHERE user_id = ? ORDER BY created_at desc LIMIT 2 OFFSET 1"
 	t.Run("FindByUserID success", func(t *testing.T) {
 		// user_id int64, limit int, offset int
 		mock.ExpectQuery(findByUserID).
@@ -122,49 +128,39 @@ func TestVideoExec(t *testing.T) {
 		CoverURL: "1",
 	}
 	t.Run("Insert success", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec(insertVideo).
 			WithArgs(1, "1", "1", "1", sqlmock.AnyArg(), sqlmock.AnyArg()).
 			WillReturnResult(sqlmock.NewResult(1, 1))
-		mock.ExpectCommit()
 		err := model.Insert(context.TODO(), v)
 		assertions.NoError(err)
 		assertions.NotZero(v.ID)
 		assertions.NotZero(v.CreatedAt)
 	})
 	t.Run("Insert error", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec(insertVideo).
 			WithArgs(1, "1", "1", "1", sqlmock.AnyArg(), sqlmock.AnyArg()).
 			WillReturnError(errors.New("error"))
-		mock.ExpectRollback()
 		err := model.Insert(context.TODO(), v)
 		assertions.Error(err)
 	})
 	t.Run("Delete success", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec("DELETE FROM `videos` WHERE id = ? AND user_id = ?").
 			WithArgs(1, 1).
 			WillReturnResult(sqlmock.NewResult(1, 1))
-		mock.ExpectCommit()
 		err := model.Delete(context.TODO(), 1, 1)
 		assertions.NoError(err)
 	})
 	t.Run("Delete error", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec("DELETE FROM `videos` WHERE id = ? AND user_id = ?").
 			WithArgs(1, 1).
 			WillReturnError(errors.New("error"))
-		mock.ExpectRollback()
 		err := model.Delete(context.TODO(), 1, 1)
 		assertions.Error(err)
 	})
 	t.Run("Delete nothing", func(t *testing.T) {
-		mock.ExpectBegin()
 		mock.ExpectExec("DELETE FROM `videos` WHERE id = ? AND user_id = ?").
 			WithArgs(1, 1).
 			WillReturnResult(sqlmock.NewResult(1, 0))
-		mock.ExpectCommit()
 		err := model.Delete(context.TODO(), 1, 1)
 		assertions.Error(err)
 	})
