@@ -13,6 +13,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/samber/lo"
 	echoSwagger "github.com/swaggo/echo-swagger"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"net/http"
@@ -38,7 +40,7 @@ func (b *CustomBinder) Bind(v any, c echo.Context) error {
 }
 
 // NewEcho returns a new echo instance and basic middleware is added
-func NewEcho(logger *zap.Logger) *echo.Echo {
+func NewEcho(logger *zap.Logger, tp *trace.TracerProvider) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true // hide echo banner
 	e.HidePort = true   // hide port in log
@@ -46,6 +48,10 @@ func NewEcho(logger *zap.Logger) *echo.Echo {
 	// add prometheus middleware
 	p := prometheus.NewPrometheus("echo", nil)
 	p.Use(e)
+
+	e.Use(
+		otelecho.Middleware("aweme-api", otelecho.WithTracerProvider(tp)),
+	) // add open telemetry middleware
 
 	e.Use(echozap.ZapLogger(logger)) // use zap logger to replace default logger
 	// add recover middleware so when panic happens, it will be recovered to centralize error handling
