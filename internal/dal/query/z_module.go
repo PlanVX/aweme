@@ -17,4 +17,6 @@ var Module = fx.Module("data access layer",
 		fx.Annotate(NewVideoModel, fx.As(new(dal.VideoModel))),
 		fx.Annotate(NewLikeModel, fx.As(new(dal.LikeModel))),
 		fx.Annotate(NewRelationModel, fx.As(new(dal.RelationModel))),
-	))
+	),
+	fx.Decorate(RedisOtel),
+)
