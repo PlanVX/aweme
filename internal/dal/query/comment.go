@@ -3,7 +3,6 @@ package query
 import (
 	"context"
 	"github.com/PlanVX/aweme/internal/dal"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -13,12 +12,12 @@ var _ dal.CommentModel = (*CommentModel)(nil)
 // CommentModel is the implementation of dal.CommentModel
 type CommentModel struct {
 	db       *gorm.DB
-	rdb      redis.UniversalClient
+	rdb      *RDB
 	uniqueID *UniqueID
 }
 
 // NewCommentModel is the constructor of CommentModel
-func NewCommentModel(db *gorm.DB, rdb redis.UniversalClient) *CommentModel {
+func NewCommentModel(db *gorm.DB, rdb *RDB) *CommentModel {
 	return &CommentModel{
 		db:       db,
 		rdb:      rdb,

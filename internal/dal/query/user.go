@@ -14,11 +14,11 @@ var _ dal.UserModel = (*UserModel)(nil)
 type UserModel struct {
 	db       *gorm.DB
 	uniqueID *UniqueID
-	rdb      redis.UniversalClient
+	rdb      *RDB
 }
 
 // NewUserModel returns a *UserModel
-func NewUserModel(db *gorm.DB, rdb redis.UniversalClient) *UserModel {
+func NewUserModel(db *gorm.DB, rdb *RDB) *UserModel {
 	return &UserModel{
 		db:       db,
 		uniqueID: NewUniqueID(),

@@ -3,7 +3,6 @@ package query
 import (
 	"context"
 	"github.com/PlanVX/aweme/internal/dal"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -13,12 +12,12 @@ var _ dal.RelationModel = (*RelationModel)(nil)
 // RelationModel is the implementation of dal.RelationModel
 type RelationModel struct {
 	db       *gorm.DB
-	rdb      redis.UniversalClient
+	rdb      *RDB
 	uniqueID *UniqueID
 }
 
 // NewRelationModel creates a new comment relation model
-func NewRelationModel(db *gorm.DB, rdb redis.UniversalClient) *RelationModel {
+func NewRelationModel(db *gorm.DB, rdb *RDB) *RelationModel {
 	return &RelationModel{
 		db:       db,
 		rdb:      rdb,
@@ -88,8 +87,11 @@ func (c *RelationModel) Insert(ctx context.Context, rel *dal.Relation) error {
 	if err != nil {
 		return err
 	}
-	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, rel.UserID), CountFollow, 1)
-	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, rel.FollowTo), CountFans, 1)
+	keyFields := []HashField{
+		{Key: GenRedisKey(TableUser, rel.UserID), Field: CountFollow},
+		{Key: GenRedisKey(TableUser, rel.FollowTo), Field: CountFans},
+	}
+	c.rdb.HKeyFieldsIncrBy(ctx, keyFields, 1)
 	return nil
 }
 
@@ -105,7 +107,10 @@ func (c *RelationModel) Delete(ctx context.Context, userid, followTo int64) erro
 	if res.RowsAffected == 0 {
 		return gorm.ErrRecordNotFound
 	}
-	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, userid), CountFollow, -1)
-	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, followTo), CountFans, -1)
+	keyFields := []HashField{
+		{Key: GenRedisKey(TableUser, userid), Field: CountFollow},
+		{Key: GenRedisKey(TableUser, followTo), Field: CountFans},
+	}
+	c.rdb.HKeyFieldsIncrBy(ctx, keyFields, -1)
 	return nil
 }
