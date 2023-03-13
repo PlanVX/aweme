@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/PlanVX/aweme/internal/config"
 	"github.com/PlanVX/aweme/internal/dal"
 	"github.com/alicebob/miniredis/v2"
-	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/fx/fxtest"
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"testing"
@@ -70,7 +72,7 @@ func TestUserFind(t *testing.T) {
 
 }
 
-func mockDB(t *testing.T) (sqlmock.Sqlmock, *gorm.DB, redis.UniversalClient, error) {
+func mockDB(t *testing.T) (sqlmock.Sqlmock, *gorm.DB, *RDB, error) {
 	db, mock, err := sqlmock.New(
 		sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual),
 	)
@@ -82,9 +84,11 @@ func mockDB(t *testing.T) (sqlmock.Sqlmock, *gorm.DB, redis.UniversalClient, err
 		SkipDefaultTransaction: true,
 	})
 	s := miniredis.RunT(t)
-	rdb := redis.NewUniversalClient(&redis.UniversalOptions{
-		Addrs: []string{s.Addr()},
-	})
+	c := config.Config{}
+	c.Redis.Addr = []string{s.Addr()}
+	lf := fxtest.NewLifecycle(t)
+	rdb := NewRedisUniversalClient(&c, lf, zap.NewExample())
+	lf.RequireStart()
 	return mock, gormDB, rdb, err
 }
 

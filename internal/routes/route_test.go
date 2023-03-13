@@ -20,15 +20,10 @@ import (
 func TestModule(t *testing.T) {
 	app := fxtest.New(t, fx.Provide(
 		func() *config.Config {
-			return &config.Config{
-				API: struct {
-					Prefix  string `yaml:"prefix"`
-					Address string `yaml:"address"`
-				}(struct {
-					Prefix  string
-					Address string
-				}{Prefix: "/api", Address: ":8421"}),
-			}
+			c := &config.Config{}
+			c.API.Prefix = "/api"
+			c.API.Address = ":8421"
+			return c
 		},
 		logic.NewJWTSigner,
 		zap.NewDevelopment,

@@ -51,9 +51,8 @@ func mockLogin(t *testing.T, u *dal.User, err error) *Login {
 
 // mockJwt is a helper function to mock the jwt signer
 func mockJwt() *JWTSigner {
-	return NewJWTSigner(&config.Config{JWT: struct {
-		Secret    string   `yaml:"secret"`
-		TTL       int64    `yaml:"ttl"`
-		Whitelist []string `yaml:"whitelist"`
-	}{Secret: "1234", TTL: 1234, Whitelist: nil}})
+	c := config.Config{}
+	c.JWT.Secret = "1234"
+	c.JWT.TTL = 1234
+	return NewJWTSigner(&c)
 }

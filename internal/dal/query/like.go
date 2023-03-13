@@ -3,7 +3,6 @@ package query
 import (
 	"context"
 	"github.com/PlanVX/aweme/internal/dal"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -13,12 +12,12 @@ var _ dal.LikeModel = (*LikeModel)(nil)
 // LikeModel is the implementation of dal.LikeModel
 type LikeModel struct {
 	db       *gorm.DB
-	rdb      redis.UniversalClient
+	rdb      *RDB
 	uniqueID *UniqueID
 }
 
 // NewLikeModel creates a new comment like model
-func NewLikeModel(db *gorm.DB, rdb redis.UniversalClient) *LikeModel {
+func NewLikeModel(db *gorm.DB, rdb *RDB) *LikeModel {
 	return &LikeModel{
 		db:       db,
 		rdb:      rdb,
@@ -83,8 +82,11 @@ func (c *LikeModel) Insert(ctx context.Context, like *dal.Like) error {
 	if err != nil {
 		return err
 	}
-	c.rdb.HIncrBy(ctx, GenRedisKey(TableVideo, like.VideoID), CountLike, 1)
-	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, like.UserID), CountLike, 1)
+	var fields = []HashField{
+		{Key: GenRedisKey(TableVideo, like.VideoID), Field: CountLike},
+		{Key: GenRedisKey(TableUser, like.UserID), Field: CountLike},
+	}
+	c.rdb.HKeyFieldsIncrBy(ctx, fields, 1)
 	return nil
 }
 
@@ -100,7 +102,10 @@ func (c *LikeModel) Delete(ctx context.Context, vid, uid int64) error {
 	if res.RowsAffected == 0 {
 		return gorm.ErrRecordNotFound
 	}
-	c.rdb.HIncrBy(ctx, GenRedisKey(TableVideo, vid), CountLike, -1)
-	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, uid), CountLike, -1)
+	var fields = []HashField{
+		{Key: GenRedisKey(TableVideo, vid), Field: CountLike},
+		{Key: GenRedisKey(TableUser, uid), Field: CountLike},
+	}
+	c.rdb.HKeyFieldsIncrBy(ctx, fields, -1)
 	return nil
 }

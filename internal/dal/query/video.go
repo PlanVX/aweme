@@ -15,11 +15,11 @@ var _ dal.VideoModel = (*VideoModel)(nil)
 type VideoModel struct {
 	db       *gorm.DB
 	uniqueID *UniqueID
-	rdb      redis.UniversalClient
+	rdb      *RDB
 }
 
 // NewVideoModel returns a *VideoModel
-func NewVideoModel(db *gorm.DB, rdb redis.UniversalClient) *VideoModel {
+func NewVideoModel(db *gorm.DB, rdb *RDB) *VideoModel {
 	return &VideoModel{
 		db:       db,
 		uniqueID: NewUniqueID(),
