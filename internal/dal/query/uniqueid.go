@@ -23,7 +23,9 @@ func NewUniqueID() *UniqueID {
 func (u *UniqueID) NextID() (int64, error) {
 	if u.sf == nil {
 		return 0, errors.New("unique id generator is not initialized")
-	} else if uid, err := u.sf.NextID(); err != nil {
+	}
+	uid, err := u.sf.NextID()
+	if err != nil {
 		return 0, err
 	} else {
 		// the 1st bit is now unused,

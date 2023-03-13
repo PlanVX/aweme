@@ -13,7 +13,7 @@ func TestNewRedisUniversalClient(t *testing.T) {
 	s := miniredis.RunT(t)
 	c := config.Config{}
 	c.Redis.Addr = []string{s.Addr()}
-	client := NewRedisUniversalClient(&c, zap.NewExample())
+	client := NewRedisUniversalClient(&c, zap.L())
 	assert.NotNil(t, client)
 	ctx := context.Background()
 	t.Run("HIncr on non number", func(t *testing.T) {
@@ -39,5 +39,8 @@ func TestNewRedisUniversalClient(t *testing.T) {
 	})
 	err := closeRedis(client)
 	assert.NoError(t, err)
+	otel, err := RedisOtel(client)
+	assert.NoError(t, err)
+	assert.NotNil(t, otel)
 	s.Close()
 }

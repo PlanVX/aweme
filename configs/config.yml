@@ -18,6 +18,12 @@ s3: # alternatively, you can use minio
   endpoint: ${S3_ENDPOINT}
 
 redis:
-  address: [$REDIS_ADDRESS]
+  address: [$REDIS_ADDRESS] # support multiple redis address
   password: ${REDIS_PASSWORD}
   db: ${REDIS_DB}
+
+otel:
+  endpoint: ${OTEL_ENDPOINT}
+  service: aweme
+  version: v0.4.1
+  environment: production

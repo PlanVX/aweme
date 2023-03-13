@@ -2,18 +2,19 @@ package routes
 
 import (
 	"context"
+	"net/http"
+	"strings"
+
 	"github.com/PlanVX/aweme/internal/api"
 	"github.com/PlanVX/aweme/internal/config"
 	"github.com/PlanVX/aweme/internal/logic"
 	"github.com/PlanVX/aweme/internal/types"
 	"github.com/brpaz/echozap"
-	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"net/http"
-	"strings"
 )
 
 var decorators []any
@@ -48,9 +49,9 @@ func NewEcho(logger *zap.Logger) *echo.Echo {
 	e.HideBanner = true // hide echo banner
 	e.HidePort = true   // hide port in log
 
-	// add prometheus middleware
-	p := prometheus.NewPrometheus("echo", nil)
-	p.Use(e)
+	e.Use(
+		otelecho.Middleware("aweme-api"),
+	) // add open telemetry middleware
 
 	e.Use(echozap.ZapLogger(logger)) // use zap logger to replace default logger
 	// add recover middleware so when panic happens, it will be recovered to centralize error handling
