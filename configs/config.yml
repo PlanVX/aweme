@@ -23,6 +23,12 @@ s3:
   partition: ${S3_PARTITION}
 
 redis:
-  address: [${REDIS_ADDRESS}]
+  address: [$REDIS_ADDRESS] # support multiple redis address
   password: ${REDIS_PASSWORD}
   db: ${REDIS_DB}
+
+uptrace:
+  dsn: ${UPTRACE_DSN}
+  service: aweme
+  version: v0.2.3
+  environment: production

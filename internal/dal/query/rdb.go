@@ -3,7 +3,9 @@ package query
 import (
 	"context"
 	"github.com/PlanVX/aweme/internal/config"
+	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
+	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
@@ -34,6 +36,14 @@ func NewRedisUniversalClient(config *config.Config, lf fx.Lifecycle, logger *zap
 		client,
 		logger,
 	}
+}
+
+// RedisOtel extends redis client with open telemetry tracing
+func RedisOtel(rdb *RDB, tp *tracesdk.TracerProvider) (*RDB, error) {
+	if err := redisotel.InstrumentTracing(rdb.UniversalClient, redisotel.WithTracerProvider(tp)); err != nil {
+		return nil, err
+	}
+	return rdb, nil
 }
 
 // HashField is the struct for specifying field of redis hash structure

@@ -40,6 +40,12 @@ type Config struct {
 		Password string   `yaml:"password"` // RedisPassword is the password of the Redis database
 		DB       int      `yaml:"db"`       // RedisDB is the database of the Redis database
 	} `yaml:"redis"` // Redis is the configuration for the Redis database
+	Uptrace struct {
+		DSN         string `yaml:"dsn"`         // UptraceDSN is the DSN of the Uptrace
+		Service     string `yaml:"service"`     // OtelService is the service name
+		Version     string `yaml:"version"`     // OtelVersion is the version of service
+		Environment string `yaml:"environment"` // OtelEnvironment is the environment of service
+	} `yaml:"uptrace"` // Uptrace is the configuration for the Uptrace
 }
 
 // NewConfig returns a new Config

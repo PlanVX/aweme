@@ -10,6 +10,7 @@ import (
 	"github.com/PlanVX/aweme/internal/types"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxtest"
 	"go.uber.org/zap"
@@ -27,6 +28,7 @@ func TestModule(t *testing.T) {
 		},
 		logic.NewJWTSigner,
 		zap.NewDevelopment,
+		tracesdk.NewTracerProvider,
 		fx.Annotate(mockApis, fx.ResultTags(`group:"public"`, `group:"optional"`, `group:"private"`)),
 	), Module,
 	)
@@ -44,7 +46,8 @@ func mockApis() (*api.Api, *api.Api, *api.Api) {
 
 func TestNewEcho(t *testing.T) {
 	example := zap.NewExample()
-	e := NewEcho(example)
+	provider := tracesdk.NewTracerProvider()
+	e := NewEcho(example, provider)
 	assertions := assert.New(t)
 	assertions.NotNil(e)
 	e.Add("GET", "/test", func(c echo.Context) error {
