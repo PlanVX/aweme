@@ -5,6 +5,7 @@ import (
 	"github.com/PlanVX/aweme/internal/config"
 	"github.com/PlanVX/aweme/internal/dal/query"
 	"github.com/PlanVX/aweme/internal/logic"
+	"github.com/PlanVX/aweme/internal/otel"
 	"github.com/PlanVX/aweme/internal/routes"
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
@@ -22,7 +23,7 @@ import (
 // @BasePath /v1
 func main() {
 	app := fx.New(
-		fx.Provide(config.NewConfig, newZapLogger),
+		fx.Provide(config.NewConfig, newZapLogger, otel.TracerProvider),
 		fx.WithLogger(fxLogger),
 		query.Module,
 		logic.Module,

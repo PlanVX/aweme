@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/PlanVX/aweme/internal/config"
 	driver "github.com/go-sql-driver/mysql"
+	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
@@ -12,7 +14,7 @@ import (
 )
 
 // NewGormDB returns a new gorm db instance
-func NewGormDB(config *config.Config, logger *zap.Logger, lf fx.Lifecycle) (*gorm.DB, error) {
+func NewGormDB(config *config.Config, logger *zap.Logger, lf fx.Lifecycle, tp *trace.TracerProvider) (*gorm.DB, error) {
 	l := zapgorm2.New(logger)
 	l.SetAsDefault()
 	db, err := gorm.Open(mysql.Open(genDsn(config)),
@@ -24,8 +26,8 @@ func NewGormDB(config *config.Config, logger *zap.Logger, lf fx.Lifecycle) (*gor
 		}
 		return sqlDB.Close()
 	}})
-	if config.Release == false { // debug mode when not release
-		db = db.Debug()
+	if err := db.Use(otelgorm.NewPlugin(otelgorm.WithTracerProvider(tp))); err != nil {
+		return nil, err
 	}
 	return db, err
 }

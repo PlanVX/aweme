@@ -5,6 +5,7 @@ import (
 	"github.com/PlanVX/aweme/internal/config"
 	"github.com/alicebob/miniredis/v2"
 	"github.com/stretchr/testify/assert"
+	tracesdk "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/fx/fxtest"
 	"go.uber.org/zap"
 	"testing"
@@ -43,6 +44,11 @@ func TestNewRedisUniversalClient(t *testing.T) {
 		}
 		client.HKeyFieldsIncrBy(ctx, fields, 1)
 	})
+
+	provider := tracesdk.NewTracerProvider()
+	otel, err := RedisOtel(client, provider)
+	assert.NoError(t, err)
+	assert.NotNil(t, otel)
 	lf.RequireStop()
 	s.Close()
 }
