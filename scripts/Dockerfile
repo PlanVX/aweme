@@ -16,7 +16,9 @@ COPY go.sum .
 RUN go mod download
 COPY . .
 
-RUN go build -ldflags="-s -w" -o /app/aweme cmd/aweme/main.go
+ARG tags
+
+RUN go build -ldflags="-s -w" -tags="${tags}" -o /app/aweme cmd/aweme/main.go
 
 
 FROM scratch

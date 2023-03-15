@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.3"
 
 services:
   mysql:
@@ -22,6 +22,9 @@ services:
     build:
       context: .
       dockerfile: ./scripts/Dockerfile
+    #args:
+    #  - tags="swagger"
+
     # for deployment, comment out the build section and use the image below
     #image: planvx/aweme:latest
     # Load environment variables from .env file
@@ -47,4 +50,3 @@ volumes:
 
 networks:
   backend:
-    name: backend
