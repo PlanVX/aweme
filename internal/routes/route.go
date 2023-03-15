@@ -2,7 +2,6 @@ package routes
 
 import (
 	"context"
-	"github.com/PlanVX/aweme/docs"
 	"github.com/PlanVX/aweme/internal/api"
 	"github.com/PlanVX/aweme/internal/config"
 	"github.com/PlanVX/aweme/internal/logic"
@@ -12,12 +11,19 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/samber/lo"
-	echoSwagger "github.com/swaggo/echo-swagger"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"net/http"
 	"strings"
 )
+
+var decorators []any
+
+// trick to make sure decorators is initialized before it is used
+var _ = func() any {
+	decorators = append(decorators, AddRouters)
+	return nil
+}()
 
 // CustomBinder is a custom binder to bind request body to struct
 type CustomBinder struct {
@@ -109,9 +115,6 @@ func AddRouters(param AddRoutersParam) *echo.Echo {
 	for _, h := range param.PrivateApis { // add private apis
 		group.Add(h.Method, h.Path, h.Handler)
 	}
-
-	docs.SwaggerInfo.BasePath = prefix                 // set swagger base path same as echo group prefix
-	param.E.GET("/swagger/*", echoSwagger.WrapHandler) // add swagger docs route
 	return param.E
 }
 

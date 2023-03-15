@@ -9,6 +9,6 @@ import "go.uber.org/fx"
 // and starts the server in fx.Lifecycle
 var Module = fx.Module("routes",
 	fx.Provide(NewEcho),
-	fx.Decorate(AddRouters),
+	fx.Invoke(decorators...),
 	fx.Invoke(StartServer),
 )
