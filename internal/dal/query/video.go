@@ -8,19 +8,19 @@ import (
 	"time"
 )
 
-// check if VideoModel implements VideoModel interface
-var _ dal.VideoModel = (*VideoModel)(nil)
+// check if VideoQuery implements VideoQuery interface
+var _ dal.VideoQuery = (*VideoQuery)(nil)
 
-// VideoModel is the implementation of dal.VideoModel
-type VideoModel struct {
+// VideoQuery is the implementation of dal.VideoQuery
+type VideoQuery struct {
 	db       *gorm.DB
 	uniqueID *UniqueID
 	rdb      *RDB
 }
 
-// NewVideoModel returns a *VideoModel
-func NewVideoModel(db *gorm.DB, rdb *RDB) *VideoModel {
-	return &VideoModel{
+// NewVideoQuery returns a *VideoQuery
+func NewVideoQuery(db *gorm.DB, rdb *RDB) *VideoQuery {
+	return &VideoQuery{
 		db:       db,
 		uniqueID: NewUniqueID(),
 		rdb:      rdb,
@@ -28,7 +28,7 @@ func NewVideoModel(db *gorm.DB, rdb *RDB) *VideoModel {
 }
 
 // FindOne find one video by id
-func (c *VideoModel) FindOne(ctx context.Context, id int64) (*dal.Video, error) {
+func (c *VideoQuery) FindOne(ctx context.Context, id int64) (*dal.Video, error) {
 	var v dal.Video
 	err := c.db.WithContext(ctx).Take(&v, id).Error
 	if err != nil {
@@ -38,7 +38,7 @@ func (c *VideoModel) FindOne(ctx context.Context, id int64) (*dal.Video, error) 
 }
 
 // FindMany find many videos by ids
-func (c *VideoModel) FindMany(ctx context.Context, ids []int64) ([]*dal.Video, error) {
+func (c *VideoQuery) FindMany(ctx context.Context, ids []int64) ([]*dal.Video, error) {
 	var videos []*dal.Video
 	err := c.db.WithContext(ctx).
 		Find(&videos, "id IN ?", ids).Error
@@ -50,7 +50,7 @@ func (c *VideoModel) FindMany(ctx context.Context, ids []int64) ([]*dal.Video, e
 
 // FindLatest find the latest videos
 // timestamp is the millisecond timestamp
-func (c *VideoModel) FindLatest(ctx context.Context, timestamp int64, limit int64) ([]*dal.Video, error) {
+func (c *VideoQuery) FindLatest(ctx context.Context, timestamp int64, limit int64) ([]*dal.Video, error) {
 	t := covertTime(timestamp)
 	var videos []*dal.Video
 	err := c.db.WithContext(ctx).
@@ -65,7 +65,7 @@ func (c *VideoModel) FindLatest(ctx context.Context, timestamp int64, limit int6
 }
 
 // FindByUserID find videos by user id
-func (c *VideoModel) FindByUserID(ctx context.Context, userID int64, limit, offset int) ([]*dal.Video, error) {
+func (c *VideoQuery) FindByUserID(ctx context.Context, userID int64, limit, offset int) ([]*dal.Video, error) {
 	var videos []*dal.Video
 	err := c.db.WithContext(ctx).
 		Where("user_id = ?", userID).
@@ -79,44 +79,8 @@ func (c *VideoModel) FindByUserID(ctx context.Context, userID int64, limit, offs
 	return c.FindManyStat(ctx, videos)
 }
 
-// Insert insert a video
-func (c *VideoModel) Insert(ctx context.Context, video *dal.Video) error {
-	id, err := c.uniqueID.NextID()
-	if err != nil {
-		return err
-	}
-	video.ID = id
-	err = c.db.WithContext(ctx).Create(video).Error
-	if err != nil {
-		return err
-	}
-	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, video.UserID), CountVideo, 1)
-	return err
-}
-
-// Update update a video
-func (*VideoModel) Update(context.Context, *dal.Video) error {
-	return nil
-}
-
-// Delete a video by its id and correct user id
-func (c *VideoModel) Delete(ctx context.Context, id int64, uid int64) error {
-	res := c.db.WithContext(ctx).
-		Where("id = ?", id).
-		Where("user_id = ?", uid).
-		Delete(&dal.Video{})
-	if res.Error != nil {
-		return res.Error
-	}
-	if res.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
-	}
-	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, uid), CountVideo, -1)
-	return nil
-}
-
 // FindOneStat find one video stat by id
-func (c *VideoModel) FindOneStat(ctx context.Context, video *dal.Video) (*dal.Video, error) {
+func (c *VideoQuery) FindOneStat(ctx context.Context, video *dal.Video) (*dal.Video, error) {
 	err := c.rdb.HGetAll(ctx, GenRedisKey(TableVideo, video.ID)).Scan(video)
 	if err != nil {
 		return nil, err
@@ -125,7 +89,7 @@ func (c *VideoModel) FindOneStat(ctx context.Context, video *dal.Video) (*dal.Vi
 }
 
 // FindManyStat find many video stats by ids
-func (c *VideoModel) FindManyStat(ctx context.Context, videos []*dal.Video) ([]*dal.Video, error) {
+func (c *VideoQuery) FindManyStat(ctx context.Context, videos []*dal.Video) ([]*dal.Video, error) {
 	cmder, err := c.rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		for _, v := range videos {
 			pipe.HGetAll(ctx, GenRedisKey(TableVideo, v.ID))
@@ -142,6 +106,61 @@ func (c *VideoModel) FindManyStat(ctx context.Context, videos []*dal.Video) ([]*
 		}
 	}
 	return videos, nil
+}
+
+// check if VideoCommand implements VideoCommand interface
+var _ dal.VideoCommand = (*VideoCommand)(nil)
+
+// VideoCommand is the implementation of dal.VideoQuery
+type VideoCommand struct {
+	db       *gorm.DB
+	uniqueID *UniqueID
+	rdb      *RDB
+}
+
+// NewVideoCommand returns a *VideoCommand
+func NewVideoCommand(db *gorm.DB, rdb *RDB) *VideoCommand {
+	return &VideoCommand{
+		db:       db,
+		uniqueID: NewUniqueID(),
+		rdb:      rdb,
+	}
+}
+
+// Insert insert a video
+func (c *VideoCommand) Insert(ctx context.Context, video *dal.Video) error {
+	id, err := c.uniqueID.NextID()
+	if err != nil {
+		return err
+	}
+	video.ID = id
+	err = c.db.WithContext(ctx).Create(video).Error
+	if err != nil {
+		return err
+	}
+	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, video.UserID), CountVideo, 1)
+	return err
+}
+
+// Update update a video
+func (*VideoCommand) Update(context.Context, *dal.Video) error {
+	return nil
+}
+
+// Delete a video by its id and correct user id
+func (c *VideoCommand) Delete(ctx context.Context, id int64, uid int64) error {
+	res := c.db.WithContext(ctx).
+		Where("id = ?", id).
+		Where("user_id = ?", uid).
+		Delete(&dal.Video{})
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	c.rdb.HIncrBy(ctx, GenRedisKey(TableUser, uid), CountVideo, -1)
+	return nil
 }
 
 // covertTime converts timestamp to time.Time in milliseconds

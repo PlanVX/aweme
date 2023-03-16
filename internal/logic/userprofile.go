@@ -10,12 +10,12 @@ import (
 type (
 	// UserProfile is the logic for querying user profile
 	UserProfile struct {
-		userModel dal.UserModel
+		userModel dal.UserQuery
 	}
 	// UserProfileParam is the parameter for NewUserProfile
 	UserProfileParam struct {
 		fx.In
-		UserModel dal.UserModel
+		UserModel dal.UserQuery
 	}
 )
 

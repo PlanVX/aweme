@@ -5,12 +5,11 @@ import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/PlanVX/aweme/internal/dal"
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestLikeFind(t *testing.T) {
-	assertions, mock, model := likeTest(t)
+	assertions, mock, model := newMock(t, NewLikeQuery)
 	const findByVideoIDAndUserID = "SELECT `likes`.`id`,`likes`.`video_id`,`likes`.`user_id`,`likes`.`created_at` FROM `likes` WHERE video_id = ? AND user_id = ? LIMIT 1"
 	t.Run("FindByVideoIDAndUserID success", func(t *testing.T) {
 		// video_id int64, user_id int64
@@ -70,16 +69,8 @@ func TestLikeFind(t *testing.T) {
 	})
 }
 
-func likeTest(t *testing.T) (*assert.Assertions, sqlmock.Sqlmock, *LikeModel) {
-	assertions := assert.New(t)
-	mock, db, rdb, err := mockDB(t)
-	assertions.NoError(err)
-	model := NewLikeModel(db, rdb)
-	return assertions, mock, model
-}
-
 func TestLikeExec(t *testing.T) {
-	assertions, mock, model := likeTest(t)
+	assertions, mock, model := newMock(t, NewLikeCommand)
 	const insert = "INSERT INTO `likes` (`video_id`,`user_id`,`created_at`,`id`) VALUES (?,?,?,?)"
 	like := &dal.Like{
 		VideoID: 1,

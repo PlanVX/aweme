@@ -54,8 +54,8 @@ func TestFeed(t *testing.T) {
 	})
 }
 
-func mockFeed(t *testing.T) (*UserModel, *VideoModel, *LikeModel, *Feed) {
-	u, v, l := NewUserModel(t), NewVideoModel(t), NewLikeModel(t)
-	feed := NewFeed(FeedParam{VideoModel: v, UserModel: u, LikeModel: l})
+func mockFeed(t *testing.T) (*UserQuery, *VideoQuery, *LikeQuery, *Feed) {
+	u, v, l := NewUserQuery(t), NewVideoQuery(t), NewLikeQuery(t)
+	feed := NewFeed(FeedParam{VideoQuery: v, UserQuery: u, LikeQuery: l})
 	return u, v, l, feed
 }

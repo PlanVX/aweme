@@ -11,20 +11,20 @@ import (
 type (
 	// CommentAction is the comment logic layer struct
 	CommentAction struct {
-		userModel    dal.UserModel
-		commentModel dal.CommentModel
+		userQuery      dal.UserQuery
+		commentCommand dal.CommentCommand
 	}
 	// CommentActionParam is the parameter for NewCommentAction
 	CommentActionParam struct {
 		fx.In
-		UserModel    dal.UserModel
-		CommentModel dal.CommentModel
+		UserQuery      dal.UserQuery
+		CommentCommand dal.CommentCommand
 	}
 )
 
 // NewCommentAction returns a new CommentAction logic
 func NewCommentAction(param CommentActionParam) *CommentAction {
-	return &CommentAction{userModel: param.UserModel, commentModel: param.CommentModel}
+	return &CommentAction{userQuery: param.UserQuery, commentCommand: param.CommentCommand}
 }
 
 // CommentAction 评论逻辑
@@ -40,12 +40,12 @@ func (c *CommentAction) CommentAction(ctx context.Context, req *types.CommentAct
 			UserID:  userid,
 		}
 
-		err := c.commentModel.Insert(ctx, comment)
+		err := c.commentCommand.Insert(ctx, comment)
 		if err != nil {
 			return nil, err
 		}
 
-		user, err := c.userModel.FindOne(ctx, userid)
+		user, err := c.userQuery.FindOne(ctx, userid)
 		if err != nil {
 			return nil, err
 		}
@@ -62,7 +62,7 @@ func (c *CommentAction) CommentAction(ctx context.Context, req *types.CommentAct
 
 	} else if req.ActionType == 2 {
 
-		err := c.commentModel.Delete(ctx, req.CommentID, userid, req.VideoID)
+		err := c.commentCommand.Delete(ctx, req.CommentID, userid, req.VideoID)
 		if err != nil {
 			return nil, err
 		}

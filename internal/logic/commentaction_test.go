@@ -16,11 +16,11 @@ func TestNewCommentAction(t *testing.T) {
 	ctx := context.WithValue(context.Background(), ContextKey, id)
 	dalUser := &dal.User{ID: id}
 	t.Run("create comment success", func(t *testing.T) {
-		model := NewCommentModel(t)
-		user := NewUserModel(t)
+		model := NewCommentCommand(t)
+		user := NewUserQuery(t)
 		model.On("Insert", mock.Anything, mock.Anything).Return(nil)
 		user.On("FindOne", mock.Anything, mock.Anything).Return(dalUser, nil)
-		c := NewCommentAction(CommentActionParam{CommentModel: model, UserModel: user})
+		c := NewCommentAction(CommentActionParam{CommentCommand: model, UserQuery: user})
 		action, err := c.CommentAction(ctx, &types.CommentActionReq{
 			VideoID:     1,
 			ActionType:  1,
@@ -32,9 +32,9 @@ func TestNewCommentAction(t *testing.T) {
 		t.Logf("action.Comment.CreateDate: %s", action.Comment.CreateDate)
 	})
 	t.Run("create comment failed", func(t *testing.T) {
-		model := NewCommentModel(t)
+		model := NewCommentCommand(t)
 		model.On("Insert", mock.Anything, mock.Anything).Return(errors.New("failed"))
-		c := NewCommentAction(CommentActionParam{CommentModel: model})
+		c := NewCommentAction(CommentActionParam{CommentCommand: model})
 		action, err := c.CommentAction(ctx, &types.CommentActionReq{
 			VideoID:     1,
 			ActionType:  1,
@@ -48,16 +48,16 @@ func TestNewCommentAction(t *testing.T) {
 		CommentID:  1,
 	}
 	t.Run("delete comment success", func(t *testing.T) {
-		model := NewCommentModel(t)
+		model := NewCommentCommand(t)
 		model.On("Delete", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		c := NewCommentAction(CommentActionParam{CommentModel: model})
+		c := NewCommentAction(CommentActionParam{CommentCommand: model})
 		action, err := c.CommentAction(ctx, delReq)
 		assertions.NoError(err)
 		assertions.NotNil(action)
 	})
 	t.Run("delete comment failed", func(t *testing.T) {
-		model := NewCommentModel(t)
-		c := NewCommentAction(CommentActionParam{CommentModel: model})
+		model := NewCommentCommand(t)
+		c := NewCommentAction(CommentActionParam{CommentCommand: model})
 		model.On("Delete", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(errors.New("failed"))
 		action, err := c.CommentAction(ctx, delReq)
 		assertions.Error(err)

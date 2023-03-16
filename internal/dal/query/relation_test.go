@@ -4,12 +4,11 @@ import (
 	"context"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/PlanVX/aweme/internal/dal"
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestRelationFind(t *testing.T) {
-	assertions, mock, model := relationTest(t)
+	assertions, mock, model := newMock(t, NewRelationQuery)
 	const FindWhetherFollowedList = "SELECT `follow_to` FROM `relations` WHERE follow_to IN (?,?) AND user_id = ?"
 	t.Run("FindWhetherFollowed success", func(t *testing.T) {
 		// userid int64, videoID []int64
@@ -41,7 +40,7 @@ func TestRelationFind(t *testing.T) {
 }
 
 func TestRelationExec(t *testing.T) {
-	assertions, mock, model := relationTest(t)
+	assertions, mock, model := newMock(t, NewRelationCommand)
 	const InsertRelation = "INSERT INTO `relations` (`user_id`,`follow_to`,`created_at`,`id`) VALUES (?,?,?,?)"
 	rel := &dal.Relation{
 		UserID:   1,
@@ -64,12 +63,4 @@ func TestRelationExec(t *testing.T) {
 		err := model.Delete(context.TODO(), rel.UserID, rel.FollowTo)
 		assertions.NoError(err)
 	})
-}
-
-func relationTest(t *testing.T) (*assert.Assertions, sqlmock.Sqlmock, *RelationModel) {
-	assertions := assert.New(t)
-	mock, db, rdb, err := mockDB(t)
-	assertions.NoError(err)
-	model := NewRelationModel(db, rdb)
-	return assertions, mock, model
 }

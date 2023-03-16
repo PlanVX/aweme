@@ -7,19 +7,19 @@ import (
 	"gorm.io/gorm"
 )
 
-// check if UserModel implements UserModel interface
-var _ dal.UserModel = (*UserModel)(nil)
+// check if UserQuery implements UserQuery interface
+var _ dal.UserQuery = (*UserQuery)(nil)
 
-// UserModel is the implementation of dal.UserModel
-type UserModel struct {
+// UserQuery is the implementation of dal.UserQuery
+type UserQuery struct {
 	db       *gorm.DB
 	uniqueID *UniqueID
 	rdb      *RDB
 }
 
-// NewUserModel returns a *UserModel
-func NewUserModel(db *gorm.DB, rdb *RDB) *UserModel {
-	return &UserModel{
+// NewUserQuery returns a *UserQuery
+func NewUserQuery(db *gorm.DB, rdb *RDB) *UserQuery {
+	return &UserQuery{
 		db:       db,
 		uniqueID: NewUniqueID(),
 		rdb:      rdb,
@@ -27,7 +27,7 @@ func NewUserModel(db *gorm.DB, rdb *RDB) *UserModel {
 }
 
 // FindOne find one user by id
-func (c *UserModel) FindOne(ctx context.Context, id int64) (*dal.User, error) {
+func (c *UserQuery) FindOne(ctx context.Context, id int64) (*dal.User, error) {
 	var u dal.User
 	err := c.db.WithContext(ctx).Take(&u, id).Error
 	if err != nil {
@@ -38,7 +38,7 @@ func (c *UserModel) FindOne(ctx context.Context, id int64) (*dal.User, error) {
 
 // FindMany find many users by ids
 // Even if there is no any user matched, it will return an empty slice
-func (c *UserModel) FindMany(ctx context.Context, ids []int64) ([]*dal.User, error) {
+func (c *UserQuery) FindMany(ctx context.Context, ids []int64) ([]*dal.User, error) {
 	var users []*dal.User
 	err := c.db.WithContext(ctx).
 		Where("id IN ?", ids).
@@ -50,30 +50,14 @@ func (c *UserModel) FindMany(ctx context.Context, ids []int64) ([]*dal.User, err
 }
 
 // FindByUsername find one user by username
-func (c *UserModel) FindByUsername(ctx context.Context, username string) (*dal.User, error) {
+func (c *UserQuery) FindByUsername(ctx context.Context, username string) (*dal.User, error) {
 	var u dal.User
 	return &u, c.db.WithContext(ctx).Select("id", "username", "password").Take(&u, "username = ?", username).Error
 
 }
 
-// Insert insert a user
-func (c *UserModel) Insert(ctx context.Context, u *dal.User) error {
-	uid, err := c.uniqueID.NextID()
-	if err != nil {
-		return err
-	}
-	u.ID = uid
-	err = c.db.WithContext(ctx).Create(u).Error
-	return err
-}
-
-// Update update a user
-func (*UserModel) Update(context.Context, *dal.User) error {
-	return nil
-}
-
 // FindOneStat find one user stat by id from redis
-func (c *UserModel) FindOneStat(ctx context.Context, user *dal.User) (*dal.User, error) {
+func (c *UserQuery) FindOneStat(ctx context.Context, user *dal.User) (*dal.User, error) {
 	err := c.rdb.HGetAll(ctx, GenRedisKey(TableUser, user.ID)).Scan(user)
 	if err != nil {
 		return nil, err
@@ -82,7 +66,7 @@ func (c *UserModel) FindOneStat(ctx context.Context, user *dal.User) (*dal.User,
 }
 
 // FindManyStat find many user stats by ids from redis
-func (c *UserModel) FindManyStat(ctx context.Context, users []*dal.User) ([]*dal.User, error) {
+func (c *UserQuery) FindManyStat(ctx context.Context, users []*dal.User) ([]*dal.User, error) {
 	cmder, err := c.rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		for _, u := range users {
 			pipe.HGetAll(ctx, GenRedisKey(TableUser, u.ID))
@@ -99,4 +83,39 @@ func (c *UserModel) FindManyStat(ctx context.Context, users []*dal.User) ([]*dal
 		}
 	}
 	return users, nil
+}
+
+// check if UserCommand implements dal.UserCommand interface
+var _ dal.UserCommand = (*UserCommand)(nil)
+
+// UserCommand is the implementation of dal.UserCommand
+type UserCommand struct {
+	db       *gorm.DB
+	uniqueID *UniqueID
+	rdb      *RDB
+}
+
+// NewUserCommand returns a *UserCommand
+func NewUserCommand(db *gorm.DB, rdb *RDB) *UserCommand {
+	return &UserCommand{
+		db:       db,
+		uniqueID: NewUniqueID(),
+		rdb:      rdb,
+	}
+}
+
+// Insert insert a user
+func (c *UserCommand) Insert(ctx context.Context, u *dal.User) error {
+	uid, err := c.uniqueID.NextID()
+	if err != nil {
+		return err
+	}
+	u.ID = uid
+	err = c.db.WithContext(ctx).Create(u).Error
+	return err
+}
+
+// Update update a user
+func (*UserCommand) Update(context.Context, *dal.User) error {
+	return nil
 }

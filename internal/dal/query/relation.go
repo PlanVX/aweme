@@ -6,19 +6,19 @@ import (
 	"gorm.io/gorm"
 )
 
-// check if RelationModel implements RelationModel interface
-var _ dal.RelationModel = (*RelationModel)(nil)
+// check if RelationQuery implements RelationQuery interface
+var _ dal.RelationQuery = (*RelationQuery)(nil)
 
-// RelationModel is the implementation of dal.RelationModel
-type RelationModel struct {
+// RelationQuery is the implementation of dal.RelationQuery
+type RelationQuery struct {
 	db       *gorm.DB
 	rdb      *RDB
 	uniqueID *UniqueID
 }
 
-// NewRelationModel creates a new comment relation model
-func NewRelationModel(db *gorm.DB, rdb *RDB) *RelationModel {
-	return &RelationModel{
+// NewRelationQuery creates a new comment relation model
+func NewRelationQuery(db *gorm.DB, rdb *RDB) *RelationQuery {
+	return &RelationQuery{
 		db:       db,
 		rdb:      rdb,
 		uniqueID: NewUniqueID(),
@@ -27,7 +27,7 @@ func NewRelationModel(db *gorm.DB, rdb *RDB) *RelationModel {
 
 // FindWhetherFollowedList query whether the user follow the followTo ids
 // return the followTo ids that the user follow
-func (c *RelationModel) FindWhetherFollowedList(ctx context.Context, userid int64, followTo []int64) ([]int64, error) {
+func (c *RelationQuery) FindWhetherFollowedList(ctx context.Context, userid int64, followTo []int64) ([]int64, error) {
 	var result []int64
 	err := c.db.WithContext(ctx).
 		Model(&dal.Relation{}).
@@ -42,7 +42,7 @@ func (c *RelationModel) FindWhetherFollowedList(ctx context.Context, userid int6
 
 // FindFollowerTo query the user's followTo
 // return the followTo ids that the user follow
-func (c *RelationModel) FindFollowerTo(ctx context.Context, userid int64, limit, offset int) ([]int64, error) {
+func (c *RelationQuery) FindFollowerTo(ctx context.Context, userid int64, limit, offset int) ([]int64, error) {
 	var result []int64
 	model := &dal.Relation{}
 	err := c.db.WithContext(ctx).
@@ -60,7 +60,7 @@ func (c *RelationModel) FindFollowerTo(ctx context.Context, userid int64, limit,
 
 // FindFollowerFrom query the user's follower
 // return the follower ids that the user is followed by
-func (c *RelationModel) FindFollowerFrom(ctx context.Context, followTo int64, limit, offset int) ([]int64, error) {
+func (c *RelationQuery) FindFollowerFrom(ctx context.Context, followTo int64, limit, offset int) ([]int64, error) {
 	var result []int64
 	err := c.db.WithContext(ctx).
 		Model(&dal.Relation{}).
@@ -75,8 +75,27 @@ func (c *RelationModel) FindFollowerFrom(ctx context.Context, followTo int64, li
 	return result, nil
 }
 
+// check if RelationCommand implements RelationCommand interface
+var _ dal.RelationCommand = (*RelationCommand)(nil)
+
+// RelationCommand is the implementation of dal.RelationCommand
+type RelationCommand struct {
+	db       *gorm.DB
+	rdb      *RDB
+	uniqueID *UniqueID
+}
+
+// NewRelationCommand creates a new comment relation model
+func NewRelationCommand(db *gorm.DB, rdb *RDB) *RelationCommand {
+	return &RelationCommand{
+		db:       db,
+		rdb:      rdb,
+		uniqueID: NewUniqueID(),
+	}
+}
+
 // Insert create a relation record
-func (c *RelationModel) Insert(ctx context.Context, rel *dal.Relation) error {
+func (c *RelationCommand) Insert(ctx context.Context, rel *dal.Relation) error {
 	id, err := c.uniqueID.NextID()
 	if err != nil {
 		return err
@@ -96,7 +115,7 @@ func (c *RelationModel) Insert(ctx context.Context, rel *dal.Relation) error {
 }
 
 // Delete a relation record by userid and followTo
-func (c *RelationModel) Delete(ctx context.Context, userid, followTo int64) error {
+func (c *RelationCommand) Delete(ctx context.Context, userid, followTo int64) error {
 	res := c.db.WithContext(ctx).
 		Where("user_id = ?", userid).
 		Where("follow_to = ?", followTo).

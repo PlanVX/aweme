@@ -17,13 +17,13 @@ func TestCommentList(t *testing.T) {
 	mockUser := []*dal.User{{ID: 1}, {ID: 2}, {ID: 3}}
 	mockFollowTo := []int64{2}
 	t.Run("test comment list query success", func(t *testing.T) {
-		u := NewUserModel(t)
-		c := NewCommentModel(t)
-		r := NewRelationModel(t)
+		u := NewUserQuery(t)
+		c := NewCommentQuery(t)
+		r := NewRelationQuery(t)
 		l := NewCommentList(CommentListParam{
-			UserModel:     u,
-			CommentModel:  c,
-			RelationModel: r,
+			UserQuery:     u,
+			CommentQuery:  c,
+			RelationQuery: r,
 		})
 		assertions.NotNil(l)
 		c.On("FindByVideoID",

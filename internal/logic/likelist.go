@@ -10,16 +10,16 @@ import (
 type (
 	// LikeList is the like list logic layer struct
 	LikeList struct {
-		likeModel  dal.LikeModel
-		videoModel dal.VideoModel
-		userModel  dal.UserModel
+		likeModel  dal.LikeQuery
+		videoModel dal.VideoQuery
+		userModel  dal.UserQuery
 	}
 	// LikeListParam is the param for NewLikeList
 	LikeListParam struct {
 		fx.In
-		LikeModel  dal.LikeModel
-		UserModel  dal.UserModel
-		VideoModel dal.VideoModel
+		LikeModel  dal.LikeQuery
+		UserModel  dal.UserQuery
+		VideoModel dal.VideoQuery
 	}
 )
 

@@ -5,12 +5,11 @@ import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/PlanVX/aweme/internal/dal"
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestCommentFind(t *testing.T) {
-	assertions, mock, model := commentTest(t)
+	assertions, mock, model := newMock(t, NewCommentQuery)
 	const findCommentsByVideoID = "SELECT `comments`.`id`,`comments`.`content`,`comments`.`video_id`,`comments`.`user_id`,`comments`.`created_at` FROM `comments` WHERE video_id = ? LIMIT 2 OFFSET 10"
 	t.Run("FindByVideoID success", func(t *testing.T) {
 		// video_id int64,limit int,offset int
@@ -33,16 +32,8 @@ func TestCommentFind(t *testing.T) {
 	})
 }
 
-func commentTest(t *testing.T) (*assert.Assertions, sqlmock.Sqlmock, *CommentModel) {
-	assertions := assert.New(t)
-	mock, db, rdb, err := mockDB(t)
-	assertions.NoError(err)
-	model := NewCommentModel(db, rdb)
-	return assertions, mock, model
-}
-
 func TestCommentExec(t *testing.T) {
-	assertions, mock, model := commentTest(t)
+	assertions, mock, model := newMock(t, NewCommentCommand)
 	const insertComment = "INSERT INTO `comments` (`content`,`video_id`,`user_id`,`created_at`,`id`) VALUES (?,?,?,?,?)"
 	c := &dal.Comment{
 		VideoID: 1,

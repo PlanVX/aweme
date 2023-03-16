@@ -6,9 +6,18 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/PlanVX/aweme/internal/dal"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 	"testing"
 	"time"
 )
+
+func newMock[R any](t *testing.T, fn func(db *gorm.DB, rdb *RDB) *R) (*assert.Assertions, sqlmock.Sqlmock, *R) {
+	assertions := assert.New(t)
+	mock, db, rdb, err := mockDB(t)
+	assertions.NoError(err)
+	model := fn(db, rdb)
+	return assertions, mock, model
+}
 
 func TestCVideoModel_covertTime(t *testing.T) {
 	t.Run("pass 0 as timestamp", func(t *testing.T) {
@@ -25,7 +34,7 @@ func TestCVideoModel_covertTime(t *testing.T) {
 }
 
 func TestVideoFind(t *testing.T) {
-	assertions, mock, model := videoTest(t)
+	assertions, mock, model := newMock(t, NewVideoQuery)
 	const findOne = "SELECT `videos`.`id`,`videos`.`user_id`,`videos`.`video_url`,`videos`.`cover_url`,`videos`.`title`,`videos`.`created_at` " +
 		"FROM `videos` " +
 		"WHERE `videos`.`id` = ? LIMIT 1"
@@ -110,16 +119,8 @@ func TestVideoFind(t *testing.T) {
 	})
 }
 
-func videoTest(t *testing.T) (*assert.Assertions, sqlmock.Sqlmock, *VideoModel) {
-	assertions := assert.New(t)
-	mock, db, rdb, err := mockDB(t)
-	assertions.NoError(err)
-	model := NewVideoModel(db, rdb)
-	return assertions, mock, model
-}
-
 func TestVideoExec(t *testing.T) {
-	assertions, mock, model := videoTest(t)
+	assertions, mock, model := newMock(t, NewVideoCommand)
 	const insertVideo = "INSERT INTO `videos` (`user_id`,`video_url`,`cover_url`,`title`,`created_at`,`id`) VALUES (?,?,?,?,?,?)"
 	v := &dal.Video{
 		UserID:   1,

@@ -11,19 +11,19 @@ import (
 type (
 	// Like is the like logic layer struct
 	Like struct {
-		likeModel dal.LikeModel
+		likeCommand dal.LikeCommand
 	}
 	// LikeParam is the param for NewLike
 	LikeParam struct {
 		fx.In
-		LikeModel dal.LikeModel
+		LikeCommand dal.LikeCommand
 	}
 )
 
 // NewLike returns a new Like logic
 func NewLike(param LikeParam) *Like {
 	return &Like{
-		likeModel: param.LikeModel,
+		likeCommand: param.LikeCommand,
 	}
 }
 
@@ -39,13 +39,13 @@ func (l *Like) Like(c context.Context, req *types.FavoriteActionReq) (*types.Fav
 			UserID:  owner,
 		}
 
-		err := l.likeModel.Insert(c, like)
+		err := l.likeCommand.Insert(c, like)
 		if err != nil {
 			return nil, err
 		}
 	case int32(2): // means remove like for a video
 
-		err := l.likeModel.Delete(c, req.VideoID, owner)
+		err := l.likeCommand.Delete(c, req.VideoID, owner)
 		if err != nil {
 			return nil, err
 		}

@@ -42,9 +42,9 @@ func TestUpload(t *testing.T) {
 	})
 }
 
-func mockUploadLogic(t *testing.T) (*MockUploader, *VideoModel, *Upload) {
+func mockUploadLogic(t *testing.T) (*MockUploader, *VideoCommand, *Upload) {
 	uploader := NewMockUploader(t)
-	v := NewVideoModel(t)
-	upload := NewUpload(UploadParam{VideoModel: v, Helper: uploader})
+	v := NewVideoCommand(t)
+	upload := NewUpload(UploadParam{VideoCommand: v, Helper: uploader})
 	return uploader, v, upload
 }
