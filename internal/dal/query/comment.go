@@ -6,27 +6,26 @@ import (
 	"gorm.io/gorm"
 )
 
-// check if CommentModel implements dal.CommentModel
-var _ dal.CommentModel = (*CommentModel)(nil)
+// check if CommentQuery implements dal.CommentQuery
+var _ dal.CommentQuery = (*CommentQuery)(nil)
 
-// CommentModel is the implementation of dal.CommentModel
-type CommentModel struct {
+// CommentQuery is the implementation of dal.CommentQuery
+type CommentQuery struct {
 	db       *gorm.DB
 	rdb      *RDB
 	uniqueID *UniqueID
 }
 
-// NewCommentModel is the constructor of CommentModel
-func NewCommentModel(db *gorm.DB, rdb *RDB) *CommentModel {
-	return &CommentModel{
-		db:       db,
-		rdb:      rdb,
-		uniqueID: NewUniqueID(),
+// NewCommentQuery is the constructor of CommentQuery
+func NewCommentQuery(db *gorm.DB, rdb *RDB) *CommentQuery {
+	return &CommentQuery{
+		db:  db,
+		rdb: rdb,
 	}
 }
 
 // FindByVideoID finds comments by video id
-func (c *CommentModel) FindByVideoID(ctx context.Context, videoID int64, limit, offset int) ([]*dal.Comment, error) {
+func (c *CommentQuery) FindByVideoID(ctx context.Context, videoID int64, limit, offset int) ([]*dal.Comment, error) {
 	var comments []*dal.Comment
 	err := c.db.WithContext(ctx).
 		Where("video_id = ?", videoID).
@@ -39,8 +38,27 @@ func (c *CommentModel) FindByVideoID(ctx context.Context, videoID int64, limit, 
 	return comments, nil
 }
 
+// check if CommentCommand implements dal.CommentCommand
+var _ dal.CommentCommand = (*CommentCommand)(nil)
+
+// CommentCommand is the implementation of dal.CommentCommand
+type CommentCommand struct {
+	db       *gorm.DB
+	rdb      *RDB
+	uniqueID *UniqueID
+}
+
+// NewCommentCommand is the constructor of CommentCommand
+func NewCommentCommand(db *gorm.DB, rdb *RDB) *CommentCommand {
+	return &CommentCommand{
+		db:       db,
+		rdb:      rdb,
+		uniqueID: NewUniqueID(),
+	}
+}
+
 // Insert inserts a comment
-func (c *CommentModel) Insert(ctx context.Context, comment *dal.Comment) error {
+func (c *CommentCommand) Insert(ctx context.Context, comment *dal.Comment) error {
 	id, err := c.uniqueID.NextID()
 	if err != nil {
 		return err
@@ -55,7 +73,7 @@ func (c *CommentModel) Insert(ctx context.Context, comment *dal.Comment) error {
 }
 
 // Delete deletes a comment by id and user id
-func (c *CommentModel) Delete(ctx context.Context, id int64, uid int64, vid int64) error {
+func (c *CommentCommand) Delete(ctx context.Context, id int64, uid int64, vid int64) error {
 	res := c.db.WithContext(ctx).
 		Where("id = ? AND user_id = ?", id, uid).
 		Delete(&dal.Comment{})

@@ -28,11 +28,11 @@ func TestNewRegister(t *testing.T) {
 	})
 }
 
-// mockRegister is a helper function to mock the UserModel and return a Register
-// err is the error that will be returned by the UserModel.Insert method
+// mockRegister is a helper function to mock the UserQuery and return a Register
+// err is the error that will be returned by the UserQuery.Insert method
 func mockRegister(t *testing.T, err error) *Register {
-	m := NewUserModel(t)
-	register := NewRegister(RegisterParam{UserModel: m, J: mockJwt()})
+	m := NewUserCommand(t)
+	register := NewRegister(RegisterParam{UserCommand: m, J: mockJwt()})
 	m.On("Insert", mock.Anything, mock.Anything).Return(err)
 	return register
 }

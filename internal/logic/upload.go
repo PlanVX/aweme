@@ -12,22 +12,22 @@ import (
 type (
 	// Upload is the logic for upload video
 	Upload struct {
-		videoModel dal.VideoModel
-		uploader   Uploader
+		videoCommand dal.VideoCommand
+		uploader     Uploader
 	}
 	// UploadParam is the param for NewUpload
 	UploadParam struct {
 		fx.In
-		VideoModel dal.VideoModel
-		Helper     Uploader
+		VideoCommand dal.VideoCommand
+		Helper       Uploader
 	}
 )
 
 // NewUpload returns a new Upload logic
 func NewUpload(param UploadParam) *Upload {
 	return &Upload{
-		videoModel: param.VideoModel,
-		uploader:   param.Helper,
+		videoCommand: param.VideoCommand,
+		uploader:     param.Helper,
 	}
 }
 
@@ -43,7 +43,7 @@ func (u *Upload) UploadVideo(c context.Context, req *types.UploadReq) (*types.Up
 	}
 
 	// insert the video into database
-	err = u.videoModel.Insert(c, &dal.Video{VideoURL: upload, UserID: owner, Title: req.Title})
+	err = u.videoCommand.Insert(c, &dal.Video{VideoURL: upload, UserID: owner, Title: req.Title})
 	if err != nil {
 		return nil, err
 	}

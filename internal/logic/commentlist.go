@@ -12,22 +12,22 @@ import (
 type (
 	// CommentList is the comment logic layer struct
 	CommentList struct {
-		userModel     dal.UserModel
-		commentModel  dal.CommentModel
-		relationModel dal.RelationModel
+		userQuery     dal.UserQuery
+		commentQuery  dal.CommentQuery
+		relationQuery dal.RelationQuery
 	}
 	// CommentListParam is the parameter for NewCommentList
 	CommentListParam struct {
 		fx.In
-		UserModel     dal.UserModel
-		CommentModel  dal.CommentModel
-		RelationModel dal.RelationModel
+		UserQuery     dal.UserQuery
+		CommentQuery  dal.CommentQuery
+		RelationQuery dal.RelationQuery
 	}
 )
 
 // NewCommentList returns a new CommentList logic
 func NewCommentList(param CommentListParam) *CommentList {
-	return &CommentList{userModel: param.UserModel, commentModel: param.CommentModel, relationModel: param.RelationModel}
+	return &CommentList{userQuery: param.UserQuery, commentQuery: param.CommentQuery, relationQuery: param.RelationQuery}
 }
 
 // CommentList 评论列表逻辑
@@ -36,7 +36,7 @@ func (c *CommentList) CommentList(ctx context.Context, req *types.CommentListReq
 	// 首先获取userid（登录用户id）
 	userid, _ := ctx.Value(ContextKey).(int64)
 
-	commentList, err := c.commentModel.FindByVideoID(ctx, req.VideoID, 30, 0)
+	commentList, err := c.commentQuery.FindByVideoID(ctx, req.VideoID, 30, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (c *CommentList) CommentList(ctx context.Context, req *types.CommentListReq
 	})
 
 	// 获取用户列表
-	userList, err := c.userModel.FindMany(ctx, userIds)
+	userList, err := c.userQuery.FindMany(ctx, userIds)
 	if err != nil {
 		return nil, err
 	}
@@ -57,10 +57,13 @@ func (c *CommentList) CommentList(ctx context.Context, req *types.CommentListReq
 		return user.ID, covertUser(user)
 	})
 
-	// 获取关注关系列表
-	list, err := c.relationModel.FindWhetherFollowedList(ctx, userid, userIds)
-	if err != nil {
-		return nil, err
+	var list []int64
+	if userid != 0 {
+		// 获取关注关系列表
+		list, err = c.relationQuery.FindWhetherFollowedList(ctx, userid, userIds)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// 转换为map

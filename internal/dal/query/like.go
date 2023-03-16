@@ -6,27 +6,25 @@ import (
 	"gorm.io/gorm"
 )
 
-// check if LikeModel implements dal.LikeModel
-var _ dal.LikeModel = (*LikeModel)(nil)
+// check if LikeQuery implements dal.LikeQuery
+var _ dal.LikeQuery = (*LikeQuery)(nil)
 
-// LikeModel is the implementation of dal.LikeModel
-type LikeModel struct {
-	db       *gorm.DB
-	rdb      *RDB
-	uniqueID *UniqueID
+// LikeQuery is the implementation of dal.LikeQuery
+type LikeQuery struct {
+	db  *gorm.DB
+	rdb *RDB
 }
 
-// NewLikeModel creates a new comment like model
-func NewLikeModel(db *gorm.DB, rdb *RDB) *LikeModel {
-	return &LikeModel{
-		db:       db,
-		rdb:      rdb,
-		uniqueID: NewUniqueID(),
+// NewLikeQuery creates a new comment like model
+func NewLikeQuery(db *gorm.DB, rdb *RDB) *LikeQuery {
+	return &LikeQuery{
+		db:  db,
+		rdb: rdb,
 	}
 }
 
 // FindByVideoIDAndUserID finds a like by video id and user id
-func (c *LikeModel) FindByVideoIDAndUserID(ctx context.Context, vid, uid int64) (*dal.Like, error) {
+func (c *LikeQuery) FindByVideoIDAndUserID(ctx context.Context, vid, uid int64) (*dal.Like, error) {
 	var like dal.Like
 	err := c.db.
 		WithContext(ctx).
@@ -40,7 +38,7 @@ func (c *LikeModel) FindByVideoIDAndUserID(ctx context.Context, vid, uid int64) 
 }
 
 // FindVideoIDsByUserID finds liked video ids by user id
-func (c *LikeModel) FindVideoIDsByUserID(ctx context.Context, uid int64, limit, offset int) ([]int64, error) {
+func (c *LikeQuery) FindVideoIDsByUserID(ctx context.Context, uid int64, limit, offset int) ([]int64, error) {
 	var likes []int64
 	err := c.db.WithContext(ctx).
 		Model(&dal.Like{}).
@@ -58,7 +56,7 @@ func (c *LikeModel) FindVideoIDsByUserID(ctx context.Context, uid int64, limit, 
 
 // FindWhetherLiked finds a like record by video ids and user id
 // return a list of video id that liked by userid
-func (c *LikeModel) FindWhetherLiked(ctx context.Context, userid int64, videoID []int64) ([]int64, error) {
+func (c *LikeQuery) FindWhetherLiked(ctx context.Context, userid int64, videoID []int64) ([]int64, error) {
 	var likes []int64
 	err := c.db.WithContext(ctx).
 		Model(&dal.Like{}).
@@ -71,8 +69,27 @@ func (c *LikeModel) FindWhetherLiked(ctx context.Context, userid int64, videoID 
 	return likes, nil
 }
 
+// check if LikeQuery implements dal.LikeCommand
+var _ dal.LikeCommand = (*LikeCommand)(nil)
+
+// LikeCommand is the implementation of dal.LikeCommand
+type LikeCommand struct {
+	db       *gorm.DB
+	rdb      *RDB
+	uniqueID *UniqueID
+}
+
+// NewLikeCommand creates a new comment like model
+func NewLikeCommand(db *gorm.DB, rdb *RDB) *LikeCommand {
+	return &LikeCommand{
+		db:       db,
+		rdb:      rdb,
+		uniqueID: NewUniqueID(),
+	}
+}
+
 // Insert inserts a like
-func (c *LikeModel) Insert(ctx context.Context, like *dal.Like) error {
+func (c *LikeCommand) Insert(ctx context.Context, like *dal.Like) error {
 	id, err := c.uniqueID.NextID()
 	if err != nil {
 		return err
@@ -91,7 +108,7 @@ func (c *LikeModel) Insert(ctx context.Context, like *dal.Like) error {
 }
 
 // Delete deletes a like by video id and user id
-func (c *LikeModel) Delete(ctx context.Context, vid, uid int64) error {
+func (c *LikeCommand) Delete(ctx context.Context, vid, uid int64) error {
 	res := c.db.WithContext(ctx).
 		Where("video_id = ?", vid).
 		Where("user_id = ?", uid).

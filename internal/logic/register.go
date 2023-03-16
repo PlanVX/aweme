@@ -11,22 +11,22 @@ import (
 type (
 	// Register is the logic for register
 	Register struct {
-		userModel dal.UserModel
-		signer    *JWTSigner
+		userCommand dal.UserCommand
+		signer      *JWTSigner
 	}
 	// RegisterParam is the parameter for NewRegister
 	RegisterParam struct {
 		fx.In
-		UserModel dal.UserModel
-		J         *JWTSigner
+		UserCommand dal.UserCommand
+		J           *JWTSigner
 	}
 )
 
 // NewRegister returns a new Register logic
 func NewRegister(param RegisterParam) *Register {
 	return &Register{
-		userModel: param.UserModel,
-		signer:    param.J,
+		userCommand: param.UserCommand,
+		signer:      param.J,
 	}
 }
 
@@ -43,7 +43,7 @@ func (l *Register) Register(ctx context.Context, req *types.UserReq) (resp *type
 		return nil, err
 	}
 
-	err = l.userModel.Insert(ctx, u) // 尝试保存到数据库
+	err = l.userCommand.Insert(ctx, u) // 尝试保存到数据库
 	if err != nil {
 		return nil, err
 	}

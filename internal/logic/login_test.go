@@ -40,11 +40,11 @@ func TestNewLogin(t *testing.T) {
 }
 
 // mockLogin is a helper function to mock the login logic
-// u is the user that will be returned by mocked UserModel.FindByUsername method
-// err is the error that will be returned by mocked UserModel.FindByUsername method
+// u is the user that will be returned by mocked UserQuery.FindByUsername method
+// err is the error that will be returned by mocked UserQuery.FindByUsername method
 func mockLogin(t *testing.T, u *dal.User, err error) *Login {
-	m := NewUserModel(t)
-	login := NewLogin(LoginParam{UserModel: m, J: mockJwt()})
+	m := NewUserQuery(t)
+	login := NewLogin(LoginParam{UserQuery: m, J: mockJwt()})
 	m.On("FindByUsername", mock.Anything, mock.Anything).Return(u, err)
 	return login
 }

@@ -30,7 +30,7 @@ func TestUserProfile(t *testing.T) {
 }
 
 func mockUserProfile(t *testing.T, u *dal.User, err error) *UserProfile {
-	m := NewUserModel(t)
+	m := NewUserQuery(t)
 	userProfile := NewUserProfile(UserProfileParam{UserModel: m})
 	m.On("FindOne", mock.Anything, mock.Anything).Return(u, err)
 	return userProfile

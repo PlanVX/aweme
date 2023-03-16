@@ -54,8 +54,8 @@ func TestPublishList(t *testing.T) {
 	})
 }
 
-func mockPublishList(t *testing.T) (*UserModel, *VideoModel, *LikeModel, *PublishList) {
-	u, v, l := NewUserModel(t), NewVideoModel(t), NewLikeModel(t)
-	list := NewPublishList(PublishListParam{VideoModel: v, UserModel: u, LikeModel: l})
+func mockPublishList(t *testing.T) (*UserQuery, *VideoQuery, *LikeQuery, *PublishList) {
+	u, v, l := NewUserQuery(t), NewVideoQuery(t), NewLikeQuery(t)
+	list := NewPublishList(PublishListParam{VideoQuery: v, UserQuery: u, LikeQuery: l})
 	return u, v, l, list
 }

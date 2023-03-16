@@ -20,7 +20,7 @@ func TestUserFind(t *testing.T) {
 	assertions := assert.New(t)
 	mock, gormDB, rdb, err := mockDB(t)
 	assertions.NoError(err)
-	model := NewUserModel(gormDB, rdb)
+	model := NewUserQuery(gormDB, rdb)
 	const findOneUser = "SELECT `users`.`id`,`users`.`username`,`users`.`password`,`users`.`avatar`,`users`.`background_image`,`users`.`signature` FROM `users` WHERE `users`.`id` = ? LIMIT 1"
 	t.Run("FindOne success", func(t *testing.T) {
 		mock.ExpectQuery(findOneUser).
@@ -107,7 +107,7 @@ func TestUserInsert(t *testing.T) {
 	assertions := assert.New(t)
 
 	const insertUser = "INSERT INTO `users` (`username`,`password`,`avatar`,`background_image`,`signature`,`id`) VALUES (?,?,?,?,?,?)"
-	model := NewUserModel(gormDB, nil)
+	model := NewUserCommand(gormDB, nil)
 	user := &dal.User{
 		Username: "test",
 		Password: []byte("test"),

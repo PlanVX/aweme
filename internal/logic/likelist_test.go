@@ -78,10 +78,10 @@ func TestLikeList(t *testing.T) {
 	})
 }
 
-func mockLikeList(t *testing.T) (*LikeModel, *VideoModel, *UserModel, *LikeList) {
-	likeModel := NewLikeModel(t)
-	videoModel := NewVideoModel(t)
-	userModel := NewUserModel(t)
+func mockLikeList(t *testing.T) (*LikeQuery, *VideoQuery, *UserQuery, *LikeList) {
+	likeModel := NewLikeQuery(t)
+	videoModel := NewVideoQuery(t)
+	userModel := NewUserQuery(t)
 	list := NewLikeList(LikeListParam{
 		LikeModel:  likeModel,
 		UserModel:  userModel,
