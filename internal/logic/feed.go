@@ -48,9 +48,12 @@ func (f *Feed) Feed(ctx context.Context, req *types.FeedReq) (resp *types.FeedRe
 
 	videoIDs := extractVideosIDs(latestVideo)
 
-	likedList, err := f.likeQuery.FindWhetherLiked(ctx, owner, videoIDs)
-	if err != nil {
-		return nil, err
+	var likedList []int64
+	if owner != 0 {
+		likedList, err = f.likeQuery.FindWhetherLiked(ctx, owner, videoIDs)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	videos := packVideos(latestVideo, users, likedList)

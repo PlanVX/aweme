@@ -1,9 +1,6 @@
 release: true
 mysql:
-  address: $MYSQL_ADDRESS
-  username: $MYSQL_USER
-  password: $MYSQL_PASSWORD
-  database: $MYSQL_DATABASE
+  dsn: $MYSQL_USER:$MYSQL_PASSWORD@tcp($MYSQL_ADDRESS)/$MYSQL_DATABASE?charset=utf8mb4&parseTime=True&loc=Local&allowNativePasswords=true
 
 jwt:
   secret: $JWT_SECRET
@@ -14,15 +11,13 @@ api:
   prefix: /v1
   address: 0.0.0.0:80
 
-s3:
+s3: # alternatively, you can use minio
   accessKey: ${S3_ACCESS_KEY}
   secretKey: ${S3_SECRET_KEY}
   bucket: ${S3_BUCKET}
-  region: ${S3_REGION}
   endpoint: ${S3_ENDPOINT}
-  partition: ${S3_PARTITION}
 
 redis:
-  address: [${REDIS_ADDRESS}]
+  address: [$REDIS_ADDRESS]
   password: ${REDIS_PASSWORD}
   db: ${REDIS_DB}

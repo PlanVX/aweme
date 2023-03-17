@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"context"
 	"github.com/PlanVX/aweme/internal/dal"
 	"github.com/PlanVX/aweme/internal/types"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +10,7 @@ import (
 
 func TestCommentList(t *testing.T) {
 	var id int64 = 1
-	ctx := context.WithValue(context.Background(), ContextKey, id)
+	ctx := ContextWithOwner(id)
 	assertions := assert.New(t)
 	mockComment := []*dal.Comment{{ID: 1, UserID: 1}, {ID: 2, UserID: 2}, {ID: 3, UserID: 3}}
 	mockUser := []*dal.User{{ID: 1}, {ID: 2}, {ID: 3}}

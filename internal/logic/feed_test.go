@@ -16,12 +16,13 @@ func TestFeed(t *testing.T) {
 	users := []*dal.User{{ID: 1}, {ID: 2}}
 	req := &types.FeedReq{LatestTime: 0}
 	liked := []int64{1, 2}
+	ctx := ContextWithOwner(int64(1))
 	t.Run("success", func(t *testing.T) {
 		u, v, l, feed := mockFeed(t)
 		v.On("FindLatest", mock.Anything, mock.Anything, mock.Anything).Return(videos, nil)
 		u.On("FindMany", mock.Anything, mock.Anything).Return(users, nil)
 		l.On("FindWhetherLiked", mock.Anything, mock.Anything, mock.Anything).Return(liked, nil)
-		resp, err := feed.Feed(context.TODO(), req)
+		resp, err := feed.Feed(ctx, req)
 		assertions.NoError(err)
 		assertions.Equal(2, len(resp.VideoList))
 		assertions.Equal(videos[0].ID, resp.VideoList[0].ID)
@@ -49,7 +50,7 @@ func TestFeed(t *testing.T) {
 		v.On("FindLatest", mock.Anything, mock.Anything, mock.Anything).Return(videos, nil)
 		u.On("FindMany", mock.Anything, mock.Anything).Return(users, nil)
 		l.On("FindWhetherLiked", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("like model error"))
-		_, err := feed.Feed(context.TODO(), req)
+		_, err := feed.Feed(ctx, req)
 		assertions.Error(err)
 	})
 }

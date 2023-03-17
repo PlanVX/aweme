@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"context"
 	"errors"
 	"github.com/PlanVX/aweme/internal/dal"
 	"github.com/PlanVX/aweme/internal/types"
@@ -13,7 +12,7 @@ import (
 func TestNewCommentAction(t *testing.T) {
 	assertions := assert.New(t)
 	var id int64 = 1
-	ctx := context.WithValue(context.Background(), ContextKey, id)
+	ctx := ContextWithOwner(id)
 	dalUser := &dal.User{ID: id}
 	t.Run("create comment success", func(t *testing.T) {
 		model := NewCommentCommand(t)

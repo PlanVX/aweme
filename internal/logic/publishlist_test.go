@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"context"
 	"errors"
 	"github.com/PlanVX/aweme/internal/dal"
 	"github.com/PlanVX/aweme/internal/types"
@@ -16,12 +15,13 @@ func TestPublishList(t *testing.T) {
 	user := &dal.User{ID: 1}
 	req := &types.PublishListReq{UserID: user.ID}
 	liked := []int64{1, 2}
+	ctx := ContextWithOwner(int64(1))
 	t.Run("Success", func(t *testing.T) {
 		u, v, l, list := mockPublishList(t)
 		v.On("FindByUserID", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(videos, nil)
 		u.On("FindOne", mock.Anything, mock.Anything).Return(user, nil)
 		l.On("FindWhetherLiked", mock.Anything, mock.Anything, mock.Anything).Return(liked, nil)
-		resp, err := list.PublishList(context.TODO(), req)
+		resp, err := list.PublishList(ctx, req)
 		assertions.NoError(err)
 		assertions.Equal(3, len(resp.VideoList))
 		assertions.Equal(videos[1].ID, resp.VideoList[1].ID)
@@ -34,14 +34,14 @@ func TestPublishList(t *testing.T) {
 	t.Run("Video model error", func(t *testing.T) {
 		_, v, _, list := mockPublishList(t)
 		v.On("FindByUserID", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("video model error"))
-		_, err := list.PublishList(context.TODO(), req)
+		_, err := list.PublishList(ctx, req)
 		assertions.Error(err)
 	})
 	t.Run("User model error", func(t *testing.T) {
 		u, v, _, list := mockPublishList(t)
 		v.On("FindByUserID", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(videos, nil)
 		u.On("FindOne", mock.Anything, mock.Anything).Return(nil, errors.New("user model error"))
-		_, err := list.PublishList(context.TODO(), req)
+		_, err := list.PublishList(ctx, req)
 		assertions.Error(err)
 	})
 	t.Run("Like model error", func(t *testing.T) {
@@ -49,7 +49,7 @@ func TestPublishList(t *testing.T) {
 		v.On("FindByUserID", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(videos, nil)
 		u.On("FindOne", mock.Anything, mock.Anything).Return(user, nil)
 		l.On("FindWhetherLiked", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("like model error"))
-		_, err := list.PublishList(context.TODO(), req)
+		_, err := list.PublishList(ctx, req)
 		assertions.Error(err)
 	})
 }

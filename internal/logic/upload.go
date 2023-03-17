@@ -37,7 +37,7 @@ func (u *Upload) UploadVideo(c context.Context, req *types.UploadReq) (*types.Up
 
 	key := strconv.FormatInt(time.Now().UnixNano(), 10) + req.FileName // generate a unique key for the video
 
-	upload, err := u.uploader.Upload(UploadInput{Key: key, Value: req.Data}) // upload the video
+	upload, err := u.uploader.Upload(c, UploadInput{Key: key, Value: req.Data}) // upload the video
 	if err != nil {
 		return nil, err
 	}

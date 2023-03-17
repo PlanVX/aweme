@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/PlanVX/aweme/internal/types"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -19,6 +18,7 @@ func TestLikeList(t *testing.T) {
 	dalVideos := []*dal.Video{{ID: 1, UserID: 4}, {ID: 2, UserID: 5}}
 	dalUsers := []*dal.User{{ID: 4}, {ID: 5}}
 	likedList := []int64{1}
+	ctx := ContextWithOwner(1)
 	t.Run("query success", func(t *testing.T) {
 		likeModel, videoModel, userModel, list := mockLikeList(t)
 		likeModel.On("FindVideoIDsByUserID",
@@ -28,17 +28,17 @@ func TestLikeList(t *testing.T) {
 		videoModel.On("FindMany", mock.Anything, mock.Anything).Return(dalVideos, nil)
 		userModel.On("FindMany", mock.Anything, mock.Anything).Return(dalUsers, nil)
 
-		resp, err := list.LikeList(context.TODO(), &types.FavoriteListReq{
+		resp, err := list.LikeList(ctx, &types.FavoriteListReq{
 			UserID: 1,
 		})
 		assertions.NoError(err)
 		assertions.NotNil(resp.VideoList)
 		assertions.True(resp.VideoList[0].IsFavorite)
 		assertions.False(resp.VideoList[1].IsFavorite)
-		lo.ForEach(resp.VideoList, func(item *types.Video, index int) {
-			assertions.Equal(dalVideos[index].ID, item.ID)
-			assertions.Equal(dalVideos[index].UserID, item.Author.ID)
-		})
+		for i, item := range resp.VideoList {
+			assertions.Equal(dalVideos[i].ID, item.ID)
+			assertions.Equal(dalVideos[i].UserID, item.Author.ID)
+		}
 	})
 	t.Run("query like list failed", func(t *testing.T) {
 		likeModel, _, _, list := mockLikeList(t)
@@ -46,7 +46,7 @@ func TestLikeList(t *testing.T) {
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything,
 		).Return(nil, errors.New("query like list failed"))
 
-		_, err := list.LikeList(context.TODO(), &types.FavoriteListReq{
+		_, err := list.LikeList(ctx, &types.FavoriteListReq{
 			UserID: 1,
 		})
 		assertions.Error(err)
@@ -58,7 +58,7 @@ func TestLikeList(t *testing.T) {
 		).Return(videoIDs, nil)
 		videoModel.On("FindMany", mock.Anything, mock.Anything).Return(nil, errors.New("query video list failed"))
 
-		_, err := list.LikeList(context.TODO(), &types.FavoriteListReq{
+		_, err := list.LikeList(ctx, &types.FavoriteListReq{
 			UserID: 1,
 		})
 		assertions.Error(err)
@@ -71,11 +71,16 @@ func TestLikeList(t *testing.T) {
 		videoModel.On("FindMany", mock.Anything, mock.Anything).Return(dalVideos, nil)
 		userModel.On("FindMany", mock.Anything, mock.Anything).Return(nil, errors.New("query user list failed"))
 
-		_, err := list.LikeList(context.TODO(), &types.FavoriteListReq{
+		_, err := list.LikeList(ctx, &types.FavoriteListReq{
 			UserID: 1,
 		})
 		assertions.Error(err)
 	})
+}
+
+func ContextWithOwner(owner int64) context.Context {
+	ctx := context.WithValue(context.Background(), ContextKey, owner)
+	return ctx
 }
 
 func mockLikeList(t *testing.T) (*LikeQuery, *VideoQuery, *UserQuery, *LikeList) {

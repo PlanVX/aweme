@@ -5,7 +5,6 @@ import (
 
 	"github.com/PlanVX/aweme/internal/dal"
 	"github.com/PlanVX/aweme/internal/types"
-	"github.com/samber/lo"
 	"go.uber.org/fx"
 )
 
@@ -42,20 +41,13 @@ func (c *CommentList) CommentList(ctx context.Context, req *types.CommentListReq
 	}
 
 	// 获取评论对应的用户id列表
-	userIds := lo.Map(commentList, func(comment *dal.Comment, _ int) int64 {
-		return comment.UserID
-	})
+	userIds := extractUserIDsFromComment(commentList)
 
 	// 获取用户列表
 	userList, err := c.userQuery.FindMany(ctx, userIds)
 	if err != nil {
 		return nil, err
 	}
-
-	// 转换为map
-	userMappings := lo.SliceToMap(userList, func(user *dal.User) (int64, *types.User) {
-		return user.ID, covertUser(user)
-	})
 
 	var list []int64
 	if userid != 0 {
@@ -66,20 +58,8 @@ func (c *CommentList) CommentList(ctx context.Context, req *types.CommentListReq
 		}
 	}
 
-	// 转换为map
-	followMappings := lo.SliceToMap(list, func(relation int64) (int64, bool) { return relation, true })
-
 	// 转换为CommentListResp
-	commentListObjs := lo.Map(commentList, func(comment *dal.Comment, _ int) *types.Comment {
-		user, _ := userMappings[comment.UserID]
-		user.IsFollow, _ = followMappings[comment.UserID] // 不存在则默认为false
-		return &types.Comment{
-			ID:         comment.ID,
-			Content:    comment.Content,
-			CreateDate: comment.CreatedAt.Format("01-02"),
-			User:       user,
-		}
-	})
+	commentListObjs := packComments(commentList, userList, list)
 
 	// 找到评论列表之后
 	return &types.CommentListResp{
