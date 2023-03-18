@@ -22,10 +22,7 @@ type Config struct {
 		Address string `yaml:"address"` // ApiAddress is the address of the API server, like 0.0.0.0:8080
 	} `yaml:"api"` // API is the configuration for the API
 	MySQL struct {
-		Address  string `yaml:"address"`  // MySQLAddress is the address of the MySQL database
-		Username string `yaml:"username"` // MySQLUsername is the username of the MySQL database
-		Password string `yaml:"password"` // MySQLPassword is the password of the MySQL database
-		Database string `yaml:"database"` // MySQLDatabase is the database of the MySQL database
+		DSN string `yaml:"dsn"` // MySQLDSN is the DSN of the MySQL database
 	} `yaml:"mysql"` // MySQL is the configuration for the MySQL database
 	S3 struct {
 		Endpoint  string `yaml:"endpoint"`  // S3Endpoint is the endpoint of the S3 bucket

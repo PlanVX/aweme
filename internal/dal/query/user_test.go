@@ -9,7 +9,6 @@ import (
 	"github.com/alicebob/miniredis/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/fx/fxtest"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -86,9 +85,7 @@ func mockDB(t *testing.T) (sqlmock.Sqlmock, *gorm.DB, *RDB, error) {
 	s := miniredis.RunT(t)
 	c := config.Config{}
 	c.Redis.Addr = []string{s.Addr()}
-	lf := fxtest.NewLifecycle(t)
-	rdb := NewRedisUniversalClient(&c, lf, zap.NewExample())
-	lf.RequireStart()
+	rdb := NewRedisUniversalClient(&c, zap.NewExample())
 	return mock, gormDB, rdb, err
 }
 

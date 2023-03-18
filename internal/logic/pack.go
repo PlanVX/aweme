@@ -3,41 +3,88 @@ package logic
 import (
 	"github.com/PlanVX/aweme/internal/dal"
 	"github.com/PlanVX/aweme/internal/types"
-	"github.com/samber/lo"
 )
 
 // composite dal.Video list and dal.User list to types.Video list
 // liked is the list of liked video id of current user
-func packVideos(videos []*dal.Video, users []*dal.User, liked []int64) []*types.Video {
-	base := lo.Map(videos, func(v *dal.Video, _ int) *types.Video {
-		return covertVideo(v)
-	}) // 将视频列表转换为 types.Video 列表
+func packVideos(videos []*dal.Video, users []*dal.User, liked []int64) (agg []*types.Video) {
+	if len(videos) == 0 {
+		return agg
+	}
 
-	mappings := lo.SliceToMap(users, func(u *dal.User) (int64, *types.User) {
-		return u.ID, covertUser(u)
-	}) // 将用户列表转换为 map
+	// 将视频列表转换为 types.Video 列表
+	agg = make([]*types.Video, len(videos))
+	for i, v := range videos {
+		agg[i] = covertVideo(v)
+	}
+
+	// 将用户列表转换为 map
+	mappings := userSliceToMap(users)
 
 	likedMap := idsMap(liked)
 
-	lo.ForEach(base, func(v *types.Video, i int) {
+	for i, v := range agg {
 		uid := videos[i].UserID
 		v.Author, _ = mappings[uid]
 		v.IsFavorite, _ = likedMap[v.ID]
-	})
+	}
 
-	return base
+	return agg
+}
+
+func packComments(commentList []*dal.Comment, users []*dal.User, list []int64) (agg []*types.Comment) {
+
+	// 转换为map
+	userMappings := userSliceToMap(users)
+
+	// 转换为map
+	followMappings := idsMap(list)
+
+	agg = make([]*types.Comment, len(commentList))
+	for i, v := range commentList {
+		agg[i] = &types.Comment{
+			ID:         v.ID,
+			Content:    v.Content,
+			CreateDate: v.CreatedAt.Format("01-02"),
+			User:       userMappings[v.UserID],
+		}
+		agg[i].User.IsFollow, _ = followMappings[v.UserID]
+	}
+	return agg
+}
+
+func userSliceToMap(users []*dal.User) map[int64]*types.User {
+	mappings := make(map[int64]*types.User, len(users))
+	for _, u := range users {
+		mappings[u.ID] = covertUser(u)
+	}
+	return mappings
 }
 
 // extractVideosIDs extract video ids from video list
-func extractVideosIDs(latestVideo []*dal.Video) []int64 {
-	return lo.Map(latestVideo, func(item *dal.Video, index int) int64 {
-		return item.ID
-	})
+func extractVideosIDs(videos []*dal.Video) (videoIDs []int64) {
+	for _, v := range videos {
+		videoIDs = append(videoIDs, v.ID)
+	}
+	return videoIDs
 }
 
 // extract UserID get user ids of videos
-func extractUserIDs(u []*dal.Video) []int64 {
-	return lo.Map(u, func(v *dal.Video, _ int) int64 { return v.UserID })
+func extractUserIDs(videos []*dal.Video) (userIDs []int64) {
+	userIDs = make([]int64, len(videos))
+	for _, v := range videos {
+		userIDs = append(userIDs, v.UserID)
+	}
+	return userIDs
+}
+
+// extractUserIDsFromComment extract user ids from comment list
+func extractUserIDsFromComment(comments []*dal.Comment) (userIDs []int64) {
+	userIDs = make([]int64, len(comments))
+	for _, v := range comments {
+		userIDs = append(userIDs, v.UserID)
+	}
+	return userIDs
 }
 
 // covertUser convert dal.User to types.User
@@ -70,5 +117,9 @@ func covertVideo(v *dal.Video) *types.Video {
 
 // idsMap is a helper function to convert a id list to a map[int64]bool
 func idsMap(followedList []int64) map[int64]bool {
-	return lo.SliceToMap(followedList, func(item int64) (int64, bool) { return item, true })
+	m := make(map[int64]bool, len(followedList))
+	for _, v := range followedList {
+		m[v] = true
+	}
+	return m
 }

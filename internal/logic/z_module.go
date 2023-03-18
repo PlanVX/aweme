@@ -20,5 +20,5 @@ var Module = fx.Module("logic",
 		NewCommentAction,
 		NewCommentList,
 		NewJWTSigner,
-		fx.Annotate(NewS3, fx.As(new(Uploader))),
+		fx.Annotate(NewMinio, fx.As(new(Uploader))),
 	))

@@ -36,6 +36,8 @@ func NewPublishList(param PublishListParam) *PublishList {
 // PublishList gets publish list
 func (p *PublishList) PublishList(ctx context.Context, req *types.PublishListReq) (*types.PublishListResp, error) {
 
+	owner, _ := ctx.Value(ContextKey).(int64)
+
 	// query videos by specified user id
 	filteredVideos, err := p.videoQuery.FindByUserID(ctx, req.UserID, 30, 0)
 	if err != nil {
@@ -51,9 +53,12 @@ func (p *PublishList) PublishList(ctx context.Context, req *types.PublishListReq
 	videoIDs := extractVideosIDs(filteredVideos)
 
 	// query like info by specified user id
-	likes, err := p.likeQuery.FindWhetherLiked(ctx, req.UserID, videoIDs)
-	if err != nil {
-		return nil, err
+	var likes []int64
+	if owner != 0 {
+		likes, err = p.likeQuery.FindWhetherLiked(ctx, owner, videoIDs)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	videos := packVideos(filteredVideos, []*dal.User{user}, likes)

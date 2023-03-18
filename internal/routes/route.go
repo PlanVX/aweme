@@ -10,7 +10,6 @@ import (
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/samber/lo"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"net/http"
@@ -106,8 +105,12 @@ func AddRouters(param AddRoutersParam) *echo.Echo {
 	for _, h := range param.PublicApis { // add public apis
 		group.Add(h.Method, h.Path, h.Handler)
 	}
+	whiteList := make([]string, len(param.OptionalApis))
+	for i, h := range param.OptionalApis {
+		whiteList[i] = prefix + h.Path
+	}
 	// 写入白名单
-	param.Signer.AddWhiteList(lo.Map(param.OptionalApis, func(h *api.Api, _ int) string { return prefix + h.Path }))
+	param.Signer.AddWhiteList(whiteList)
 	group.Use(param.Signer.NewJWTMiddleware()) // use jwt middleware
 	for _, h := range param.OptionalApis {     // add optional apis
 		group.Add(h.Method, h.Path, h.Handler)
@@ -130,17 +133,20 @@ func prefixSkipper(prefix string) func(c echo.Context) bool {
 	}
 }
 
-// StartServer starts the HTTP server in fx.Lifecycle, so that it can be gracefully shutdown.
-func StartServer(lf fx.Lifecycle, e *echo.Echo, c *config.Config) {
+// NewHTTPServer starts the HTTP server in fx.Lifecycle, so that it can be gracefully shutdown.
+func NewHTTPServer(e *echo.Echo, c *config.Config) *http.Server {
 	server := &http.Server{Addr: c.API.Address, Handler: e}
-	lf.Append(fx.Hook{OnStart: func(ctx context.Context) error {
-		go func() {
-			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				panic(err)
-			}
-		}()
-		return nil
-	}, OnStop: func(ctx context.Context) error {
-		return server.Shutdown(ctx)
-	}})
+	return server
+}
+
+func startHook(server *http.Server) {
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			panic(err)
+		}
+	}()
+}
+
+func stopHook(ctx context.Context, server *http.Server) error {
+	return server.Shutdown(ctx)
 }

@@ -52,9 +52,12 @@ func (l *LikeList) LikeList(ctx context.Context, req *types.FavoriteListReq) (*t
 		return nil, err
 	}
 
-	likedList, err := l.likeModel.FindWhetherLiked(ctx, owner, likes)
-	if err != nil {
-		return nil, err
+	var likedList []int64
+	if owner != 0 {
+		likedList, err = l.likeModel.FindWhetherLiked(ctx, owner, likes)
+		if err != nil {
+			return nil, err
+		}
 	}
 	// set is favorite
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/PlanVX/aweme/internal/config"
 	"github.com/redis/go-redis/v9"
-	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
 
@@ -15,25 +14,21 @@ type RDB struct {
 }
 
 // NewRedisUniversalClient returns a redis client extended with zap logger on incr error
-func NewRedisUniversalClient(config *config.Config, lf fx.Lifecycle, logger *zap.Logger) *RDB {
+func NewRedisUniversalClient(config *config.Config, logger *zap.Logger) *RDB {
 	client := redis.NewUniversalClient(&redis.UniversalOptions{
 		Addrs:    config.Redis.Addr,
 		Password: config.Redis.Password,
 		DB:       config.Redis.DB,
 	})
-	lf.Append(
-		fx.Hook{
-			OnStart: func(ctx context.Context) error {
-				return client.Ping(ctx).Err()
-			},
-			OnStop: func(ctx context.Context) error {
-				return client.Close()
-			},
-		})
 	return &RDB{
 		client,
 		logger,
 	}
+}
+
+// closeRedis closes the redis client
+func closeRedis(client *RDB) error {
+	return client.Close()
 }
 
 // HashField is the struct for specifying field of redis hash structure

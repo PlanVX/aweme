@@ -134,3 +134,17 @@ func Test_prefixSkipper(t *testing.T) {
 	}
 
 }
+
+type Request struct {
+	Data string `query:"data"`
+}
+
+func TestBind(t *testing.T) {
+	request := httptest.NewRequest("POST", "/test?data=test", nil)
+	e := echo.New()
+	newContext := e.NewContext(request, nil)
+	v := &Request{}
+	err := NewCustomBinder().Bind(v, newContext)
+	assert.NoError(t, err)
+	assert.Equal(t, "test", v.Data)
+}
