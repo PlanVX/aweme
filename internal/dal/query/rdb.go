@@ -2,7 +2,9 @@ package query
 
 import (
 	"context"
+
 	"github.com/PlanVX/aweme/internal/config"
+	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
@@ -29,6 +31,14 @@ func NewRedisUniversalClient(config *config.Config, logger *zap.Logger) *RDB {
 // closeRedis closes the redis client
 func closeRedis(client *RDB) error {
 	return client.Close()
+}
+
+// RedisOtel extends redis client with open telemetry tracing
+func RedisOtel(rdb *RDB) (*RDB, error) {
+	if err := redisotel.InstrumentTracing(rdb.UniversalClient); err != nil {
+		return nil, err
+	}
+	return rdb, nil
 }
 
 // HashField is the struct for specifying field of redis hash structure
