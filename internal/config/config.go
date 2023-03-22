@@ -22,7 +22,8 @@ type Config struct {
 		Address string `yaml:"address"` // ApiAddress is the address of the API server, like 0.0.0.0:8080
 	} `yaml:"api"` // API is the configuration for the API
 	MySQL struct {
-		DSN string `yaml:"dsn"` // MySQLDSN is the DSN of the MySQL database
+		DSN      string   `yaml:"dsn"`      // MySQLDSN is the DSN of the MySQL database
+		Replicas []string `yaml:"replicas"` // MySQLDSN is the replicas database dsn of the MySQL database
 	} `yaml:"mysql"` // MySQL is the configuration for the MySQL database
 	S3 struct {
 		Endpoint  string `yaml:"endpoint"`  // S3Endpoint is the endpoint of the S3 bucket
@@ -38,6 +39,7 @@ type Config struct {
 		DB       int      `yaml:"db"`       // RedisDB is the database of the Redis database
 	} `yaml:"redis"` // Redis is the configuration for the Redis database
 	Otel struct {
+		Enabled     bool   `yaml:"enabled"`     // OtelEnabled is the flag to enable OpenTelemetry
 		Endpoint    string `yaml:"endpoint"`    // OtelEndpoint is the endpoint of the OpenTelemetry collector
 		Service     string `yaml:"service"`     // OtelService is the service name
 		Version     string `yaml:"version"`     // OtelVersion is the version of service

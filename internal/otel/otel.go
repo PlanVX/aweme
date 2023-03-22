@@ -19,6 +19,9 @@ import (
 
 // TracerProvider constructs a new trace provider.
 func TracerProvider(conf *config.Config) (*trace.TracerProvider, error) {
+	if conf.Otel.Enabled == false {
+		return trace.NewTracerProvider(), nil
+	}
 	exporter, err := otlptracegrpc.New(context.Background(),
 		otlptracegrpc.WithInsecure(),
 		otlptracegrpc.WithEndpoint(conf.Otel.Endpoint),
@@ -46,6 +49,9 @@ func stopTracerProvider(ctx context.Context, tp *trace.TracerProvider) error {
 
 // MeterProvider constructs a new meter provider.
 func MeterProvider(conf *config.Config) (*metric.MeterProvider, error) {
+	if conf.Otel.Enabled == false {
+		return metric.NewMeterProvider(), nil
+	}
 	options := []otlpmetricgrpc.Option{
 		otlpmetricgrpc.WithEndpoint(conf.Otel.Endpoint),
 		otlpmetricgrpc.WithCompressor("gzip"),

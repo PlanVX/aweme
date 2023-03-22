@@ -1,6 +1,7 @@
 release: true
 mysql:
   dsn: $MYSQL_USER:$MYSQL_PASSWORD@tcp($MYSQL_ADDRESS)/$MYSQL_DATABASE?charset=utf8mb4&parseTime=True&loc=Local&allowNativePasswords=true
+  replicas: [] # support multiple mysql replicas dsn
 
 jwt:
   secret: $JWT_SECRET
@@ -23,6 +24,7 @@ redis:
   db: ${REDIS_DB}
 
 otel:
+  enabled: false
   endpoint: ${OTEL_ENDPOINT}
   service: aweme
   version: v0.4.1

@@ -23,5 +23,5 @@ var Module = fx.Module("data access layer",
 		fx.Annotate(NewLikeCommand, fx.As(new(dal.LikeCommand))),
 		fx.Annotate(NewRelationQuery, fx.As(new(dal.RelationQuery))),
 	),
-	fx.Decorate(RedisOtel),
+	fx.Decorate(RedisOtel, withPlugins),
 )
