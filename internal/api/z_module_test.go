@@ -40,6 +40,7 @@ type Dep struct {
 	LikeList    *logic.LikeList
 	Comment     *logic.CommentAction
 	CommentList *logic.CommentList
+	Follow      *logic.FollowAction
 }
 
 func TestGroupedValues(t *testing.T) {

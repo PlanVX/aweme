@@ -15,6 +15,7 @@ package api
 
 import (
 	"context"
+	"github.com/PlanVX/aweme/internal/logic"
 	"github.com/PlanVX/aweme/internal/types"
 )
 
@@ -27,13 +28,11 @@ import (
 // @Param relation formData types.RelationActionReq true "用户信息"
 // @Success 200 {object} types.RelationActionResp
 // @Router /relation/action/ [post]
-func NewRelationAction() *API {
+func NewRelationAction(action *logic.FollowAction) *API {
 	return &API{
-		Method: "POST",
-		Path:   "/relation/action/",
-		Handler: WrapperFunc(func(ctx context.Context, req *types.RelationActionReq) (*types.RelationActionResp, error) {
-			return nil, nil
-		}),
+		Method:  "POST",
+		Path:    "/relation/action/",
+		Handler: WrapperFunc(action.Follow),
 	}
 }
 
