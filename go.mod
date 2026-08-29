@@ -13,7 +13,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.50
 	github.com/redis/go-redis/extra/redisotel/v9 v9.0.2
 	github.com/redis/go-redis/v9 v9.0.2
-	github.com/sony/sonyflake v1.1.0
+	github.com/sony/sonyflake v1.3.0
 	github.com/stretchr/testify v1.8.2
 	github.com/swaggo/echo-swagger v1.3.5
 	github.com/swaggo/swag v1.8.10
