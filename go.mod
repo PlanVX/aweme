@@ -7,7 +7,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.30.1
 	github.com/brpaz/echozap v1.1.3
 	github.com/go-playground/validator/v10 v10.11.2
-	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/labstack/echo-jwt/v4 v4.1.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/minio/minio-go/v7 v7.0.50
